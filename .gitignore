@@ -4,6 +4,7 @@ log/
 videos/
 test/
 utils/
+docs/
 **/__pycache__/
 *.pyc
 .vscode/
