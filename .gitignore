@@ -1,0 +1,9 @@
+build/
+install/
+log/
+videos/
+test/
+**/__pycache__/
+*.pyc
+.vscode/
+.DS_Store
