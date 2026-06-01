@@ -4,7 +4,9 @@ log/
 videos/
 test/
 utils/
-docs/
+docs/*
+!docs/ABU Robocon 2026 Rulebook V1.0.pdf
+!docs/Appendix V1.1.pdf
 **/__pycache__/
 *.pyc
 .vscode/

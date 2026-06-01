@@ -44,7 +44,7 @@ def generate_launch_description():
             '-topic', 'robot_description',
             '-x', '2.6165',
             '-y', '-4.0',
-            '-z', '5.5'
+            '-z', '0.1'
         ],
         output='screen',
     )
@@ -67,13 +67,14 @@ def generate_launch_description():
             '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
             '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
-            '/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
+            #'/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
             '/scan/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
             '/camera/rgbd/image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/camera/rgbd/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
             '/camera/rgbd/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
             '/camera/rgbd/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
             '/imu@sensor_msgs/msg/Imu[gz.msgs.IMU',
+            '/ground_truth_odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
         ],
         output='screen'
     )
@@ -169,6 +170,6 @@ def generate_launch_description():
         load_arm_controller,
         relay_cmd_vel,
         gui_node,
-        icp_odom_launch,
-        ekf_node
+        # icp_odom_launch,
+        # ekf_node
     ])

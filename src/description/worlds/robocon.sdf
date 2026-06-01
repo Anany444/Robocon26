@@ -28,7 +28,7 @@
       <ambient>0.6 0.6 0.6 1.0</ambient>
       <background>0.7 0.7 0.7 1</background>
       <shadows>true</shadows>
-      <sky></sky>
+      <!-- <sky></sky> -->
     </scene>
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>

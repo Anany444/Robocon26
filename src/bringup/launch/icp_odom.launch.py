@@ -17,13 +17,12 @@ def generate_launch_description():
                 'odom_frame_id': 'odom',
                 'wait_for_transform': 0.2,
                 'use_sim_time': use_sim_time,
-                'subscribe_scan': False,
-                'subscribe_scan_cloud': True,
                 # ICP tuning parameters for better performance
                 'Icp/PointToPlane': 'true',
                 'Icp/VoxelSize': '0.1',
                 'Odom/ScanKeyFrameThr': '0.6',
-                'publish_tf': False,
+                'Odom/ResetCountdown': '1',
+                'publish_tf': True,
                 'publish_null_when_lost': False,
             }],
             remappings=[
