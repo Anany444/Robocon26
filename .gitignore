@@ -3,6 +3,7 @@ install/
 log/
 videos/
 test/
+utils/
 **/__pycache__/
 *.pyc
 .vscode/
