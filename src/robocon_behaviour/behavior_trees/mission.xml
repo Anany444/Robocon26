@@ -1,0 +1,98 @@
+<root main_tree_to_execute="MainMissionTree">
+    <!-- The Root of our Mission -->
+    <BehaviorTree ID="MainMissionTree">
+        <Sequence name="MissionSequence">
+            
+            <!-- 1. Start the mission -->
+            <!-- <WaitServiceTrigger service_name="/trigger_start_mission" /> -->
+            
+            <!-- 2. Release spearhead -->
+            <!-- <WaitServiceTrigger service_name="/trigger_release_spearhead" /> -->
+            
+            <!-- 3. Move towards forest -->
+            <WaitServiceTrigger service_name="/trigger_move_to_forest" />
+            
+            <!-- Navigate to Checking Location -->
+            <MoveToLocation location_name="check_block2_kfs" />
+
+            <!-- Loop until we detect something that IS NOT r1_kfs -->
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <DetectKFS kfs_type="{kfs_result}"/>
+                    
+                    <!-- If it's r1_kfs, this sequence succeeds, so Inverter makes it FAIL (triggering a retry). -->
+                    <!-- If it's NOT r1_kfs, CheckString fails, Inverter makes it SUCCEED (breaking the retry loop). -->
+                    <Inverter>
+                        <Sequence>
+                            <CheckString value="{kfs_result}" target="r1_kfs"/>
+                            <WaitDuration sec="10"/>
+                        </Sequence>
+                    </Inverter>
+                </Sequence>
+            </RetryUntilSuccessful>
+
+            <!-- We now have a non-r1 kfs result. Move to approach location -->
+            <MoveToLocation location_name="block2_approach" />
+
+            <!-- Act based on KFS result -->
+            <Fallback>
+                <!-- Case 1: No KFS detected, climb block -->
+                <Sequence>
+                    <CheckString value="{kfs_result}" target="none"/>
+                    <CallTriggerService service_name="/trigger_climb_block" />
+                </Sequence>
+
+                <!-- Case 2: R2's KFS (real) detected, pick it up and then climb -->
+                <Sequence>
+                    <CheckString value="{kfs_result}" target="r2_kfs_real"/>
+                    <CallTriggerService service_name="/trigger_pick_kfs" />
+                    <IncrementCount count="{kfs_count}" />
+                    <CallTriggerService service_name="/trigger_climb_block" />
+                </Sequence>
+            </Fallback>
+
+            <!-- 3. Auto Explore Algorithm -->
+            <RetryUntilSuccessful num_attempts="100">
+                <Fallback>
+                    <!-- If count >= 2, Inverter returns SUCCESS, breaking the retry loop to exit forest -->
+                    <Inverter>
+                        <CheckCount count="{kfs_count}" target="2" />
+                    </Inverter>
+                    
+                    <!-- If count < 2, explore adjacent block -->
+                    <Sequence>
+                        <CallTriggerService service_name="/trigger_explore_next_block" />
+                        <DetectKFS kfs_type="{kfs_result}" />
+                        <Fallback>
+                            <Sequence>
+                                <CheckString value="{kfs_result}" target="r2_kfs_real"/>
+                                <CallTriggerService service_name="/trigger_pick_kfs" />
+                                <IncrementCount count="{kfs_count}" />
+                                <CallTriggerService service_name="/trigger_climb_block" />
+                            </Sequence>
+                            <Sequence>
+                                <CheckString value="{kfs_result}" target="none"/>
+                                <CallTriggerService service_name="/trigger_climb_block" />
+                            </Sequence>
+                        </Fallback>
+                        <!-- Force failure to loop again and explore next block -->
+                        <AlwaysFailure/>
+                    </Sequence>
+                </Fallback>
+            </RetryUntilSuccessful>
+            
+            <!-- 4. Exit the forest -->
+            <WaitServiceTrigger service_name="/trigger_exit_forest" />
+            
+            <!-- 5. Enter arena through ramp -->
+            <WaitServiceTrigger service_name="/trigger_enter_arena" />
+            
+            <!-- 6. Place scroll -->
+            <WaitServiceTrigger service_name="/trigger_place_scroll" />
+            
+            <!-- 7. Get into lifting position -->
+            <WaitServiceTrigger service_name="/trigger_prepare_lift" />
+
+        </Sequence>
+    </BehaviorTree>
+</root>
