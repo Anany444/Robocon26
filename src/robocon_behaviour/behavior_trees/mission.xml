@@ -51,38 +51,65 @@
                 </Sequence>
             </Fallback>
 
-            <!-- 3. Auto Explore Algorithm -->
-            <RetryUntilSuccessful num_attempts="100">
-                <Fallback>
-                    <!-- If count >= 2, Inverter returns SUCCESS, breaking the retry loop to exit forest -->
-                    <Inverter>
-                        <CheckCount count="{kfs_count}" target="2" />
-                    </Inverter>
+            <!-- 3. Auto Explore Algorithm (Dijkstra-based State Machine) -->
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <!-- Ask the Python Planner Node what to do next -->
+                    <CalculateNextAction action_out="{next_action}" face_dir_out="{face_dir}" relocate_dir_out="{reloc_dir}" />
                     
-                    <!-- If count < 2, explore adjacent block -->
-                    <Sequence>
-                        <CallTriggerService service_name="/trigger_explore_next_block" />
-                        <DetectKFS kfs_type="{kfs_result}" />
-                        <Fallback>
-                            <Sequence>
-                                <CheckString value="{kfs_result}" target="r2_kfs_real"/>
-                                <CallTriggerService service_name="/trigger_pick_kfs" />
-                                <IncrementCount count="{kfs_count}" />
-                                <CallTriggerService service_name="/trigger_climb_block" />
-                            </Sequence>
-                            <Sequence>
-                                <CheckString value="{kfs_result}" target="none"/>
-                                <CallTriggerService service_name="/trigger_climb_block" />
-                            </Sequence>
-                        </Fallback>
-                        <!-- Force failure to loop again and explore next block -->
-                        <AlwaysFailure/>
-                    </Sequence>
-                </Fallback>
+                    <Fallback>
+                        <!-- EXIT PATH (Succeeds and breaks the Retry loop) -->
+                        <Sequence>
+                            <CheckString value="{next_action}" target="EXIT"/>
+                            <FaceBlock direction="{face_dir}" />
+                            <MoveToFacedBlock />
+                        </Sequence>
+                        
+                        <!-- HARVEST PATH (Fails and loops) -->
+                        <Sequence>
+                            <CheckString value="{next_action}" target="PICK"/>
+                            <FaceBlock direction="{face_dir}" />
+                            <PickKFS />
+                            <StoreKFS />
+                            <UpdateKFSCount />
+                            <AlwaysFailure/>
+                        </Sequence>
+
+                        <!-- RELOCATE PATH (Fails and loops) -->
+                        <Sequence>
+                            <CheckString value="{next_action}" target="RELOCATE"/>
+                            <FaceBlock direction="{face_dir}" />
+                            <PickKFS />
+                            <!-- Turn to the empty adjacent block -->
+                            <FaceBlock direction="{reloc_dir}" />
+                            <RelocateKFS />
+                            <AlwaysFailure/>
+                        </Sequence>
+
+                        <!-- MOVE PATH (Fails and loops) -->
+                        <Sequence>
+                            <CheckString value="{next_action}" target="MOVE"/>
+                            <FaceBlock direction="{face_dir}" />
+                            <MoveToFacedBlock />
+                            <!-- Sweep sensors to update the known_maze in the planner -->
+                            <ScanSurroundings />
+                            <AlwaysFailure/>
+                        </Sequence>
+
+                        <!-- WAIT PATH (Fails and loops) -->
+                        <Sequence>
+                            <CheckString value="{next_action}" target="WAIT"/>
+                            <FaceBlock direction="{face_dir}" />
+                            <WaitDuration sec="10"/>
+                            <AlwaysFailure/>
+                        </Sequence>
+                    </Fallback>
+                </Sequence>
             </RetryUntilSuccessful>
             
             <!-- 4. Exit the forest -->
-            <WaitServiceTrigger service_name="/trigger_exit_forest" />
+            <!-- Note: The exit movement is now handled by the EXIT PATH inside the loop above. -->
+            <!-- <WaitServiceTrigger service_name="/trigger_exit_forest" /> -->
             
             <!-- 5. Enter arena through ramp -->
             <WaitServiceTrigger service_name="/trigger_enter_arena" />

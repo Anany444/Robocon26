@@ -41,6 +41,7 @@ class PlannerNode(Node):
         self.climb_srv = self.create_service(Trigger, '/trigger_climb_block', self.climb_trigger_callback, callback_group=self.cb_group)
         self.pick_srv = self.create_service(Trigger, '/trigger_pick_kfs', self.pick_trigger_callback, callback_group=self.cb_group)
         self.explore_srv = self.create_service(Trigger, '/trigger_explore_next_block', self.explore_trigger_callback, callback_group=self.cb_group)
+        self.approach_srv = self.create_service(Trigger, '/trigger_approach_adjacent', self.approach_adjacent_callback, callback_group=self.cb_group)
         
         # Prefer the src file for live editing without rebuilds
         ws_src_path = "/home/robot/robocon_ws/src/robocon_bringup/config/locations.yaml"
@@ -117,6 +118,44 @@ class PlannerNode(Node):
             
         self.path_pub.publish(path_msg)
         self.get_logger().info(f"Published path with {len(waypoints)} waypoints.")
+        
+    def yaw_to_quaternion(self, yaw):
+        from geometry_msgs.msg import Quaternion
+        q = Quaternion()
+        q.z = math.sin(yaw / 2.0)
+        q.w = math.cos(yaw / 2.0)
+        return q
+        
+    def publish_relative_path(self, distance, target_yaw=None):
+        if target_yaw is None:
+            target_yaw = self.current_yaw
+            
+        path_msg = Path()
+        path_msg.header.frame_id = "odom"
+        path_msg.header.stamp = self.get_clock().now().to_msg()
+        
+        pose = PoseStamped()
+        pose.header = path_msg.header
+        pose.pose.position.x = self.current_x + distance * math.cos(target_yaw)
+        pose.pose.position.y = self.current_y + distance * math.sin(target_yaw)
+        pose.pose.position.z = 0.0
+        pose.pose.orientation = self.yaw_to_quaternion(target_yaw)
+        
+        path_msg.poses.append(pose)
+        self.path_pub.publish(path_msg)
+        self.get_logger().info(f"Published relative path: dist={distance}, yaw={target_yaw}")
+
+    def get_kfs_detection(self):
+        client = self.create_client(Trigger, '/detect_center_kfs', callback_group=self.cb_group)
+        if not client.wait_for_service(timeout_sec=2.0):
+            return "none"
+        req = Trigger.Request()
+        future = client.call_async(req)
+        import time
+        while not future.done():
+            time.sleep(0.1)
+        res = future.result()
+        return res.message if res else "none"
 
     def set_extrusions(self, front_val, back_val):
         traj = JointTrajectory()
@@ -164,7 +203,7 @@ class PlannerNode(Node):
         self.get_clock().sleep_for(Duration(seconds=1.5))
         
         self.get_logger().info("2. Moving forward onto the block...")
-        self.publish_location_path("block2_climb_mid")
+        self.publish_relative_path(0.35)
         self.get_clock().sleep_for(Duration(seconds=4.0))
         
         self.get_logger().info("3. Pulling back extrusions UP...")
@@ -172,9 +211,7 @@ class PlannerNode(Node):
         self.get_clock().sleep_for(Duration(seconds=1.5))
         
         self.get_logger().info("4. Going to target block center...")
-        self.publish_location_path("block2_center")
-        
-        # Wait a bit for it to reach center before acknowledging
+        self.publish_relative_path(0.35)
         self.get_clock().sleep_for(Duration(seconds=3.0))
         
         self.get_logger().info("Climb sequence complete! Acknowledging.")
@@ -185,8 +222,9 @@ class PlannerNode(Node):
     def pick_trigger_callback(self, request, response):
         self.get_logger().info("Pick sequence triggered!")
         
-        target_x = self.current_x + 1.2 * math.cos(self.current_yaw)
-        target_y = self.current_y + 1.2 * math.sin(self.current_yaw)
+        # We are already approached by 0.5m, so the block is ~0.7m away
+        target_x = self.current_x + 0.7 * math.cos(self.current_yaw)
+        target_y = self.current_y + 0.7 * math.sin(self.current_yaw)
         
         target_height = 0.0
         map_path = self.yaml_path.replace('locations.yaml', 'game_field_map.yaml')
@@ -243,15 +281,51 @@ class PlannerNode(Node):
         response.message = "Successfully picked KFS"
         return response
 
-    def explore_trigger_callback(self, request, response):
-        self.get_logger().info("Exploring adjacent blocks...")
-        
-        # Placeholder for auto-algorithm: finding adjacent block and navigating
-        self.get_clock().sleep_for(Duration(seconds=2.0))
-        
-        self.get_logger().info("Moved to next block!")
+    def approach_adjacent_callback(self, request, response):
+        self.get_logger().info("Approaching adjacent block...")
+        self.publish_relative_path(0.5)
+        self.get_clock().sleep_for(Duration(seconds=3.0))
         response.success = True
-        response.message = "Arrived at next block"
+        return response
+
+    def explore_trigger_callback(self, request, response):
+        self.get_logger().info("Exploring adjacent blocks to find KFS...")
+        
+        # 1. Look front (+Y -> pi/2)
+        self.publish_relative_path(0.0, target_yaw=math.pi/2.0)
+        self.get_clock().sleep_for(Duration(seconds=2.0))
+        res_front = self.get_kfs_detection()
+        if res_front == "r2_kfs_real":
+            response.success = True
+            return response
+            
+        # 2. Look left (-X -> pi)
+        self.publish_relative_path(0.0, target_yaw=math.pi)
+        self.get_clock().sleep_for(Duration(seconds=2.0))
+        res_left = self.get_kfs_detection()
+        if res_left == "r2_kfs_real":
+            response.success = True
+            return response
+            
+        # 3. Look right (+X -> 0.0)
+        self.publish_relative_path(0.0, target_yaw=0.0)
+        self.get_clock().sleep_for(Duration(seconds=2.0))
+        res_right = self.get_kfs_detection()
+        if res_right == "r2_kfs_real":
+            response.success = True
+            return response
+            
+        # 4. If none found, fallback to whichever was "none" (empty)
+        if res_front == "none":
+            self.publish_relative_path(0.0, target_yaw=math.pi/2.0)
+        elif res_left == "none":
+            self.publish_relative_path(0.0, target_yaw=math.pi)
+        elif res_right == "none":
+            self.publish_relative_path(0.0, target_yaw=0.0)
+            
+        self.get_clock().sleep_for(Duration(seconds=2.0))
+        self.get_logger().info("Finished scanning, facing optimal block.")
+        response.success = True
         return response
 
 def main(args=None):
