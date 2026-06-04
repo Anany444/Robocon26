@@ -1,0 +1,65 @@
+# This document defines the interfaces (Requests/Results) for the High-Level Sequences.
+
+high_level_sequences:
+  
+  # 1. Face towards a specific adjacent direction
+  face_towards_an_adjacent_block:
+    request:
+      current_block_id: "uint8 [1-12]"
+      direction: "string [front, back, left, right]"
+    result:
+      status: "string [success, failed]"
+
+  # 2. Move the chassis forward to the block currently being faced
+  move_from_current_block_to_faced_block:
+    request:
+      current_block_id: "uint8 [1-12]"
+      target_block_id: "uint8 [1-12]"
+    result:
+      status: "string [success, failed, blocked]"
+
+  # 3. Trigger the vision system to scan the block in front
+  scan_the_faced_block:
+    request: {}
+    result:
+      kfs_detected: "string [none, r1_kfs, r2_kfs_real, r2_kfs_fake]"
+
+  # 4. Actuate the gripper to pick up the KFS on the current block
+  pick_kfs_from_faced_block:
+    request:
+      current_block_id: "uint8 [1-12]"
+      target_block_id: "uint8 [1-12]"
+    result:
+      status: "string [success, failed, dropped]"
+
+  # 5. Move the gripped KFS into the internal silo/storage
+  store_picked_kfs_on_bot:
+    request:
+      current_kfs_count: "uint8 [0-2]" 
+    result:
+      status: "string [stored, already_full]"
+      current_kfs_count: "uint8 [0-2]"
+
+  # 6. Place the gripped KFS down onto the empty block in front of the bot
+  place_picked_kfs_on_faced_block:
+    request:
+      current_block_id: "uint8 [1-12]"
+      target_block_id: "uint8 [1-12]"
+    result:
+      status: "string [success, failed]"
+
+  # 7. Wait and periodically scan until an R1 KFS is removed
+  wait_for_r1_kfs_pick:
+    request:
+      target_block_id: "uint8 [1-12]"
+      timeout_seconds: "float32"
+      retry_interval_seconds: "float32"
+    result:
+      status: "string [cleared, timed_out]"
+
+  # 8. Final sequence to navigate off the board
+  exit_forest:
+    request:
+      current_block_id: "uint8 [10, 12]"
+    result:
+      status: "string [success, failed]"

@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Float64MultiArray
 from std_srvs.srv import Trigger
 from std_msgs.msg import String
 import tkinter as tk
@@ -16,7 +17,7 @@ class RobotControlGUI(Node):
         # Publishers
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.traj_pub = self.create_publisher(JointTrajectory, '/extrusion_controller/joint_trajectory', 10)
-        self.gripper_pub = self.create_publisher(JointTrajectory, '/gripper_controller/joint_trajectory', 10)
+        self.gripper_pub = self.create_publisher(Float64MultiArray, '/gripper_controller/commands', 10)
         self.arm_pub = self.create_publisher(JointTrajectory, '/arm_controller/joint_trajectory', 10)
         self.mock_kfs_pub = self.create_publisher(String, '/vision/mock_kfs_status', 10)
         
@@ -84,12 +85,8 @@ class RobotControlGUI(Node):
         self.get_logger().info(f"All Extrusions set to {pos}")
 
     def publish_gripper_trajectory(self):
-        msg = JointTrajectory()
-        msg.joint_names = ['left_gripper_joint', 'right_gripper_joint']
-        point = JointTrajectoryPoint()
-        point.positions = [self.gripper_pos, self.gripper_pos]
-        point.time_from_start = Duration(sec=1, nanosec=0)
-        msg.points.append(point)
+        msg = Float64MultiArray()
+        msg.data = [float(self.gripper_pos), float(self.gripper_pos)]
         self.gripper_pub.publish(msg)
 
     def set_gripper(self, pos):

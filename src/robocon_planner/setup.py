@@ -24,7 +24,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'planner_node = robocon_planner.planner_node:main',
+            'high_level_planner = robocon_planner.high_level_planner:main',
+            'low_level_planner = robocon_planner.low_level_planner:main',
+            'hardware_controller = robocon_planner.hardware_controller:main'
         ],
     },
 )

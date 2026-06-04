@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Float64MultiArray
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, Twist
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -25,10 +25,10 @@ class PlannerNode(Node):
         self.cmd_vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         self.extrusion_pub = self.create_publisher(JointTrajectory, '/extrusion_controller/joint_trajectory', 10)
         self.arm_pub = self.create_publisher(JointTrajectory, '/arm_controller/joint_trajectory', 10)
-        self.gripper_pub = self.create_publisher(JointTrajectory, '/gripper_controller/joint_trajectory', 10)
+        self.gripper_pub = self.create_publisher(Float64MultiArray, '/gripper_controller/commands', 10)
         
         self.zone_sub = self.create_subscription(ZoneState, '/current_zone', self.zone_callback, 10)
-        self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+        self.odom_sub = self.create_subscription(Odometry, '/ground_truth_odom', self.odom_callback, 10)
         
         self.current_zone = None
         self.current_x = 0.0
@@ -43,6 +43,9 @@ class PlannerNode(Node):
         self.explore_srv = self.create_service(Trigger, '/trigger_explore_next_block', self.explore_trigger_callback, callback_group=self.cb_group)
         self.approach_srv = self.create_service(Trigger, '/trigger_approach_adjacent', self.approach_adjacent_callback, callback_group=self.cb_group)
         
+        # Generic hardware trigger for testing the BT ExecuteLowLevelPlan loop
+        self.generic_trigger_srv = self.create_service(Trigger, '/hardware_trigger', self.generic_trigger_callback, callback_group=self.cb_group)
+        
         # Prefer the src file for live editing without rebuilds
         ws_src_path = "/home/robot/robocon_ws/src/robocon_bringup/config/locations.yaml"
         if os.path.exists(ws_src_path):
@@ -56,6 +59,7 @@ class PlannerNode(Node):
         self.current_zone = msg
 
     def odom_callback(self, msg):
+        # self.get_logger().info(f"Odom: ({msg.pose.pose.position.x:.2f}, {msg.pose.pose.position.y:.2f}, {msg.pose.pose.position.z:.2f})")
         self.current_x = msg.pose.pose.position.x
         self.current_y = msg.pose.pose.position.y
         self.current_z = msg.pose.pose.position.z
@@ -159,6 +163,7 @@ class PlannerNode(Node):
 
     def set_extrusions(self, front_val, back_val):
         traj = JointTrajectory()
+        traj.header.stamp = self.get_clock().now().to_msg()
         traj.joint_names = [
             'left_front_extrusion_joint', 
             'right_front_extrusion_joint', 
@@ -175,6 +180,7 @@ class PlannerNode(Node):
 
     def set_arm(self, angle):
         traj = JointTrajectory()
+        traj.header.stamp = self.get_clock().now().to_msg()
         traj.joint_names = ['left_arm_joint', 'right_arm_joint']
         point = JointTrajectoryPoint()
         point.positions = [angle, angle]
@@ -185,15 +191,9 @@ class PlannerNode(Node):
         self.arm_pub.publish(traj)
         
     def set_gripper(self, width):
-        traj = JointTrajectory()
-        traj.joint_names = ['left_gripper_joint', 'right_gripper_joint']
-        point = JointTrajectoryPoint()
-        point.positions = [width, width]
-        point.velocities = [0.0, 0.0]
-        point.time_from_start.sec = 1
-        point.time_from_start.nanosec = 0
-        traj.points.append(point)
-        self.gripper_pub.publish(traj)
+        msg = Float64MultiArray()
+        msg.data = [float(width), float(width)]
+        self.gripper_pub.publish(msg)
 
     def climb_trigger_callback(self, request, response):
         self.get_logger().info("Climb sequence triggered!")
@@ -203,15 +203,15 @@ class PlannerNode(Node):
         self.get_clock().sleep_for(Duration(seconds=1.5))
         
         self.get_logger().info("2. Moving forward onto the block...")
-        self.publish_relative_path(0.35)
-        self.get_clock().sleep_for(Duration(seconds=4.0))
+        self.publish_relative_path(0.55)
+        self.get_clock().sleep_for(Duration(seconds=2.0))
         
         self.get_logger().info("3. Pulling back extrusions UP...")
         self.set_extrusions(front_val=0.0, back_val=0.0)
         self.get_clock().sleep_for(Duration(seconds=1.5))
         
         self.get_logger().info("4. Going to target block center...")
-        self.publish_relative_path(0.35)
+        self.publish_relative_path(0.65)
         self.get_clock().sleep_for(Duration(seconds=3.0))
         
         self.get_logger().info("Climb sequence complete! Acknowledging.")
@@ -223,28 +223,35 @@ class PlannerNode(Node):
         self.get_logger().info("Pick sequence triggered!")
         
         # We are already approached by 0.5m, so the block is ~0.7m away
-        target_x = self.current_x + 0.7 * math.cos(self.current_yaw)
-        target_y = self.current_y + 0.7 * math.sin(self.current_yaw)
+        target_x = self.current_x #+ 0.7 * math.cos(self.current_yaw)
+        target_y = self.current_y + 0.7 #* math.sin(self.current_yaw)
+
+        # self.get_logger().info(f"Target: ({target_x:.2f}, {target_y:.2f})")
         
         target_height = 0.0
         map_path = self.yaml_path.replace('locations.yaml', 'game_field_map.yaml')
         if os.path.exists(map_path):
             with open(map_path, 'r') as f:
                 map_data = yaml.safe_load(f)
-                def find_block_height(data):
+                best_height = 0.0
+                min_dist = 999.0
+                
+                def find_closest_block(data):
+                    nonlocal best_height, min_dist
                     if isinstance(data, dict):
                         for k, v in data.items():
                             if k.startswith('block_') and isinstance(v, dict):
-                                if v.get('x_min', 0) <= target_x <= v.get('x_max', 0) and v.get('y_min', 0) <= target_y <= v.get('y_max', 0):
-                                    return v.get('height', 0.0)
-                            res = find_block_height(v)
-                            if res is not None:
-                                return res
-                    return None
-                    
-                found_height = find_block_height(map_data)
-                if found_height is not None:
-                    target_height = found_height
+                                cx = (v.get('x_min', 0) + v.get('x_max', 0)) / 2.0
+                                cy = (v.get('y_min', 0) + v.get('y_max', 0)) / 2.0
+                                dist = math.hypot(target_x - cx, target_y - cy)
+                                if dist < min_dist and dist < 1.0: # Must be within 1.0m to be valid
+                                    min_dist = dist
+                                    best_height = v.get('height', 0.0)
+                            find_closest_block(v)
+                            
+                find_closest_block(map_data)
+                if min_dist < 999.0:
+                    target_height = best_height
                             
         current_height = self.current_zone.expected_height if self.current_zone else 0.0
         
@@ -264,7 +271,7 @@ class PlannerNode(Node):
         
         self.get_logger().info("2. Closing gripper...")
         self.set_gripper(0.2) # closed
-        self.get_clock().sleep_for(Duration(seconds=1.5))
+        self.get_clock().sleep_for(Duration(seconds=2.5))
         
         self.get_logger().info("3. Moving arm behind...")
         self.set_arm(-2.0) # behind
@@ -286,6 +293,13 @@ class PlannerNode(Node):
         self.publish_relative_path(0.5)
         self.get_clock().sleep_for(Duration(seconds=3.0))
         response.success = True
+        return response
+
+    def generic_trigger_callback(self, request, response):
+        self.get_logger().info("Received generic hardware trigger from BT. Mocking 1-second execution...")
+        self.get_clock().sleep_for(Duration(seconds=1.0))
+        response.success = True
+        response.message = "Hardware step complete"
         return response
 
     def explore_trigger_callback(self, request, response):

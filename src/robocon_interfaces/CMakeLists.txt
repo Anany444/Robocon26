@@ -11,6 +11,10 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ZoneState.msg"
+  "srv/GetHighLevelPlan.srv"
+  "srv/GetLowLevelPlan.srv"
+  "srv/PickKFS.srv"
+  "srv/FaceDirection.srv"
 )
 
 # uncomment the following section in order to fill in

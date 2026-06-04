@@ -12,7 +12,7 @@ controller_manager:
       type: joint_trajectory_controller/JointTrajectoryController
 
     gripper_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
+      type: position_controllers/JointGroupPositionController
 
     arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
@@ -53,11 +53,7 @@ gripper_controller:
     joints:
       - left_gripper_joint
       - right_gripper_joint
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
+    interface_name: position
 
 arm_controller:
   ros__parameters:

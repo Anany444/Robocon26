@@ -137,6 +137,7 @@ def generate_launch_description():
         executable='gui_node',
         name='gui_node',
         output='screen',
+        parameters=[{'use_sim_time': True}]
     )
 
     # 10. EKF Node
@@ -166,12 +167,12 @@ def generate_launch_description():
     )
 
     # 13. Mission Executor (Behavior Tree)
-    mission_executor_node = Node(
-        package='robocon_behaviour',
-        executable='mission_executor',
-        name='mission_executor',
-        output='screen'
-    )
+    # mission_executor_node = Node(
+    #     package='robocon_behaviour',
+    #     executable='mission_executor',
+    #     name='mission_executor',
+    #     output='screen'
+    # )
 
     # 14. Goal Pose Controller
     goal_pose_controller_node = Node(
@@ -181,19 +182,27 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 15. Planner Node
-    planner_node = Node(
-        package='robocon_planner',
-        executable='planner_node',
-        name='planner_node',
-        output='screen'
-    )
+    # 15. Planner Node (Replaced by 3-tier terminals)
+    # planner_node = Node(
+    #     package='robocon_planner',
+    #     executable='planner_node',
+    #     name='planner_node',
+    #     output='screen'
+    # )
     # 16. Vision Node
     vision_node = Node(
         package='robocon_vision',
         executable='kfs_detection',
         name='kfs_detection',
         output='screen'
+    )
+
+    controller_node = Node(
+        package='robocon_controller',
+        executable='controller_node',
+        name='controller_node',
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
     
     return LaunchDescription([
@@ -213,8 +222,9 @@ def generate_launch_description():
         # icp_odom_launch,
         # ekf_node,
         zone_publisher_node,
-        mission_executor_node,
+        # mission_executor_node, # Run manually in terminal
         goal_pose_controller_node,
-        planner_node,
-        vision_node
+        # planner_node, # Run manually in terminals
+        vision_node,
+        controller_node
     ])

@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'gui_node = robocon_controller.gui_node:main',
             'goal_pose_controller = robocon_controller.goal_pose_controller:main',
+            'controller_node = robocon_controller.controller_node:main',
         ],
     },
 )
