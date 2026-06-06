@@ -75,6 +75,44 @@ class ZonePublisher(Node):
                         if self.is_inside(x, y, block_data):
                             zone_msg.local_zone = block_name
                             zone_msg.expected_height = block_data.get('height', 0.0)
+                            
+                            # Calculate facing block based on yaw
+                            import math
+                            try:
+                                block_id = int(block_name.replace('block_', ''))
+                                COORDS_TO_BLOCK = {
+                                    (0, 0): 12, (0, 1): 11, (0, 2): 10,
+                                    (1, 0): 9,  (1, 1): 8,  (1, 2): 7,
+                                    (2, 0): 6,  (2, 1): 5,  (2, 2): 4,
+                                    (3, 0): 3,  (3, 1): 2,  (3, 2): 1
+                                }
+                                BLOCK_TO_COORDS = {v: k for k, v in COORDS_TO_BLOCK.items()}
+                                
+                                if block_id in BLOCK_TO_COORDS:
+                                    r, c = BLOCK_TO_COORDS[block_id]
+                                    q = msg.pose.pose.orientation
+                                    t3 = +2.0 * (q.w * q.z + q.x * q.y)
+                                    t4 = +1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+                                    yaw = math.atan2(t3, t4)
+                                    
+                                    yaw = (yaw + 2 * math.pi) % (2 * math.pi)
+                                    if yaw >= 7 * math.pi / 4 or yaw < math.pi / 4:
+                                        dr, dc = 0, 1 # East
+                                    elif math.pi / 4 <= yaw < 3 * math.pi / 4:
+                                        dr, dc = -1, 0 # North
+                                    elif 3 * math.pi / 4 <= yaw < 5 * math.pi / 4:
+                                        dr, dc = 0, -1 # West
+                                    else:
+                                        dr, dc = 1, 0 # South
+                                        
+                                    nr, nc = r + dr, c + dc
+                                    if (nr, nc) in COORDS_TO_BLOCK:
+                                        zone_msg.facing_block = f"block_{COORDS_TO_BLOCK[(nr, nc)]}"
+                                    else:
+                                        zone_msg.facing_block = "none"
+                            except Exception:
+                                pass
+                            
                             break
                 break
 

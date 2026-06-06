@@ -8,10 +8,13 @@
 
 using namespace BT;
 
-#include <robocon_interfaces/srv/get_high_level_plan.hpp>
-#include <robocon_interfaces/srv/get_low_level_plan.hpp>
+#include <robocon_interfaces/srv/get_plan.hpp>
 #include <robocon_interfaces/srv/pick_kfs.hpp>
+#include <robocon_interfaces/srv/place_kfs.hpp>
 #include <robocon_interfaces/srv/face_direction.hpp>
+#include <robocon_interfaces/srv/scan_block.hpp>
+#include <robocon_interfaces/srv/move_to_block.hpp>
+#include <robocon_interfaces/msg/zone_state.hpp>
 #include <nlohmann/json.hpp> // Assuming standard ROS 2 setup has nlohmann
 
 // A helper function to parse simple JSON string array manually if nlohmann isn't present
@@ -214,28 +217,77 @@ private:
     bool goal_reached_;
 };
 
-class DetectKFS : public BT::ActionNodeBase
+class ParseTargetBlockId : public BT::SyncActionNode
 {
 public:
-    DetectKFS(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
+    ParseTargetBlockId(const std::string& name, const BT::NodeConfiguration& config)
+        : BT::SyncActionNode(name, config)
+    {}
+
+    static BT::PortsList providedPorts()
+    {
+        return { 
+            BT::InputPort<std::string>("json_str"),
+            BT::OutputPort<int>("block_id_out")
+        };
+    }
+
+    BT::NodeStatus tick() override
+    {
+        std::string json_str;
+        if (!getInput("json_str", json_str)) {
+            throw BT::RuntimeError("missing required input [json_str]");
+        }
+
+        try {
+            auto j = nlohmann::json::parse(json_str);
+            if (j.contains("target_block_id")) {
+                int block_id = j["target_block_id"];
+                setOutput("block_id_out", block_id);
+                return BT::NodeStatus::SUCCESS;
+            } else {
+                return BT::NodeStatus::FAILURE;
+            }
+        } catch (...) {
+            return BT::NodeStatus::FAILURE;
+        }
+    }
+};
+
+class ScanBlock : public BT::ActionNodeBase
+{
+public:
+    ScanBlock(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
         : BT::ActionNodeBase(name, config), node_(node), request_sent_(false)
     {
-        client_ = node_->create_client<std_srvs::srv::Trigger>("/detect_center_kfs");
+        client_ = node_->create_client<robocon_interfaces::srv::ScanBlock>("/scan_block");
     }
 
     static BT::PortsList providedPorts()
     {
-        return { BT::OutputPort<std::string>("kfs_type") };
+        return { 
+            BT::InputPort<int>("target_block_id"),
+            BT::OutputPort<std::string>("kfs_detected"),
+            BT::OutputPort<std::string>("status")
+        };
     }
 
     BT::NodeStatus tick() override
     {
         if (!request_sent_) {
             if (!client_->wait_for_service(std::chrono::milliseconds(0))) {
-                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /detect_center_kfs not available, waiting...");
+                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /scan_block not available, waiting...");
                 return BT::NodeStatus::RUNNING;
             }
-            auto req = std::make_shared<std_srvs::srv::Trigger::Request>();
+            
+            int target_block;
+            if (!getInput("target_block_id", target_block)) {
+                throw BT::RuntimeError("missing required input [target_block_id]");
+            }
+            
+            auto req = std::make_shared<robocon_interfaces::srv::ScanBlock::Request>();
+            req->target_block_id = target_block;
+            
             future_ = client_->async_send_request(req).future.share();
             request_sent_ = true;
             return BT::NodeStatus::RUNNING;
@@ -245,11 +297,12 @@ public:
             request_sent_ = false;
             try {
                 auto result = future_.get();
-                setOutput("kfs_type", result->message);
-                RCLCPP_INFO(node_->get_logger(), "Detected KFS: %s", result->message.c_str());
+                setOutput("kfs_detected", result->kfs_detected);
+                setOutput("status", result->status);
+                RCLCPP_INFO(node_->get_logger(), "Scanned KFS: %s", result->kfs_detected.c_str());
                 return BT::NodeStatus::SUCCESS;
-            } catch (...) {
-                RCLCPP_ERROR(node_->get_logger(), "Failed to call detection service");
+            } catch (const std::exception& e) {
+                RCLCPP_ERROR(node_->get_logger(), "Service call failed: %s", e.what());
                 return BT::NodeStatus::FAILURE;
             }
         }
@@ -263,8 +316,8 @@ public:
 
 private:
     rclcpp::Node::SharedPtr node_;
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_;
-    std::shared_future<std_srvs::srv::Trigger::Response::SharedPtr> future_;
+    rclcpp::Client<robocon_interfaces::srv::ScanBlock>::SharedPtr client_;
+    std::shared_future<std::shared_ptr<robocon_interfaces::srv::ScanBlock::Response>> future_;
     bool request_sent_;
 };
 
@@ -376,6 +429,144 @@ private:
     bool request_sent_;
 };
 
+class ExecutePlaceKFS : public BT::ActionNodeBase
+{
+public:
+    ExecutePlaceKFS(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
+        : BT::ActionNodeBase(name, config), node_(node), request_sent_(false)
+    {
+        client_ = node_->create_client<robocon_interfaces::srv::PlaceKFS>("/place_kfs");
+    }
+
+    static BT::PortsList providedPorts()
+    {
+        return { 
+            BT::InputPort<int>("current_block"),
+            BT::InputPort<int>("target_block")
+        };
+    }
+
+    BT::NodeStatus tick() override
+    {
+        if (!request_sent_) {
+            if (!client_->wait_for_service(std::chrono::milliseconds(0))) {
+                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /place_kfs not available, waiting...");
+                return BT::NodeStatus::RUNNING;
+            }
+            auto req = std::make_shared<robocon_interfaces::srv::PlaceKFS::Request>();
+            
+            int c_block = 0, t_block = 0;
+            getInput("current_block", c_block);
+            getInput("target_block", t_block);
+            
+            req->current_block_id = c_block;
+            req->target_block_id = t_block;
+
+            future_ = client_->async_send_request(req).future.share();
+            request_sent_ = true;
+            return BT::NodeStatus::RUNNING;
+        }
+
+        if (future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            request_sent_ = false;
+            try {
+                auto result = future_.get();
+                if (result->success) {
+                    RCLCPP_INFO(node_->get_logger(), "PlaceKFS success: %s", result->message.c_str());
+                    return BT::NodeStatus::SUCCESS;
+                } else {
+                    RCLCPP_ERROR(node_->get_logger(), "PlaceKFS failed: %s", result->message.c_str());
+                    return BT::NodeStatus::FAILURE;
+                }
+            } catch (...) {
+                RCLCPP_ERROR(node_->get_logger(), "Failed to call /place_kfs service");
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+        return BT::NodeStatus::RUNNING;
+    }
+
+    void halt() override
+    {
+        request_sent_ = false;
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Client<robocon_interfaces::srv::PlaceKFS>::SharedPtr client_;
+    std::shared_future<robocon_interfaces::srv::PlaceKFS::Response::SharedPtr> future_;
+    bool request_sent_;
+};
+
+class MoveToBlock : public BT::ActionNodeBase
+{
+public:
+    MoveToBlock(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
+        : BT::ActionNodeBase(name, config), node_(node), request_sent_(false)
+    {
+        client_ = node_->create_client<robocon_interfaces::srv::MoveToBlock>("/move_to_block");
+    }
+
+    static BT::PortsList providedPorts()
+    {
+        return { 
+            BT::InputPort<int>("current_block_id"),
+            BT::InputPort<int>("target_block_id")
+        };
+    }
+
+    BT::NodeStatus tick() override
+    {
+        if (!request_sent_) {
+            if (!client_->wait_for_service(std::chrono::milliseconds(0))) {
+                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /move_to_block not available, waiting...");
+                return BT::NodeStatus::RUNNING;
+            }
+            auto req = std::make_shared<robocon_interfaces::srv::MoveToBlock::Request>();
+            
+            int c_block = 0, t_block = 0;
+            getInput("current_block_id", c_block);
+            getInput("target_block_id", t_block);
+            
+            req->current_block_id = c_block;
+            req->target_block_id = t_block;
+
+            future_ = client_->async_send_request(req).future.share();
+            request_sent_ = true;
+            return BT::NodeStatus::RUNNING;
+        }
+
+        if (future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            request_sent_ = false;
+            try {
+                auto result = future_.get();
+                if (result->success) {
+                    RCLCPP_INFO(node_->get_logger(), "MoveToBlock success: %s", result->message.c_str());
+                    return BT::NodeStatus::SUCCESS;
+                } else {
+                    RCLCPP_ERROR(node_->get_logger(), "MoveToBlock failed: %s", result->message.c_str());
+                    return BT::NodeStatus::FAILURE;
+                }
+            } catch (...) {
+                RCLCPP_ERROR(node_->get_logger(), "Failed to call /move_to_block service");
+                return BT::NodeStatus::FAILURE;
+            }
+        }
+        return BT::NodeStatus::RUNNING;
+    }
+
+    void halt() override
+    {
+        request_sent_ = false;
+    }
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Client<robocon_interfaces::srv::MoveToBlock>::SharedPtr client_;
+    std::shared_future<robocon_interfaces::srv::MoveToBlock::Response::SharedPtr> future_;
+    bool request_sent_;
+};
+
 class ExecuteFaceDirection : public BT::ActionNodeBase
 {
 public:
@@ -470,13 +661,13 @@ private:
     bool request_sent_;
 };
 
-class GetHighLevelPlan : public BT::ActionNodeBase
+class GetPlan : public BT::ActionNodeBase
 {
 public:
-    GetHighLevelPlan(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
+    GetPlan(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
         : BT::ActionNodeBase(name, config), node_(node), request_sent_(false)
     {
-        client_ = node_->create_client<robocon_interfaces::srv::GetHighLevelPlan>("/get_high_level_plan");
+        client_ = node_->create_client<robocon_interfaces::srv::GetPlan>("/get_plan");
     }
 
     static BT::PortsList providedPorts()
@@ -495,10 +686,10 @@ public:
     {
         if (!request_sent_) {
             if (!client_->wait_for_service(std::chrono::milliseconds(0))) {
-                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /get_high_level_plan not available, waiting...");
+                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /get_plan not available, waiting...");
                 return BT::NodeStatus::RUNNING;
             }
-            auto req = std::make_shared<robocon_interfaces::srv::GetHighLevelPlan::Request>();
+            auto req = std::make_shared<robocon_interfaces::srv::GetPlan::Request>();
             
             int block_id = 4;
             getInput("current_block_id", block_id);
@@ -527,7 +718,7 @@ public:
                 auto result = future_.get();
                 setOutput("sequence_out", result->sequence_name);
                 setOutput("params_out", result->sequence_params_json);
-                RCLCPP_INFO(node_->get_logger(), "Got High Level Plan: %s", result->sequence_name.c_str());
+                RCLCPP_INFO(node_->get_logger(), "Got Plan: %s", result->sequence_name.c_str());
                 return BT::NodeStatus::SUCCESS;
             } catch (...) {
                 return BT::NodeStatus::FAILURE;
@@ -540,77 +731,8 @@ public:
 
 private:
     rclcpp::Node::SharedPtr node_;
-    rclcpp::Client<robocon_interfaces::srv::GetHighLevelPlan>::SharedPtr client_;
-    std::shared_future<robocon_interfaces::srv::GetHighLevelPlan::Response::SharedPtr> future_;
-    bool request_sent_;
-};
-
-class GetLowLevelPlan : public BT::ActionNodeBase
-{
-public:
-    GetLowLevelPlan(const std::string& name, const BT::NodeConfiguration& config, rclcpp::Node::SharedPtr node)
-        : BT::ActionNodeBase(name, config), node_(node), request_sent_(false)
-    {
-        client_ = node_->create_client<robocon_interfaces::srv::GetLowLevelPlan>("/get_low_level_plan");
-    }
-
-    static BT::PortsList providedPorts()
-    {
-        return { 
-            BT::InputPort<std::string>("sequence_in"),
-            BT::InputPort<std::string>("params_in"),
-            BT::OutputPort<std::string>("subseqs_out"),
-            BT::OutputPort<std::string>("subseq_params_out")
-        };
-    }
-
-    BT::NodeStatus tick() override
-    {
-        if (!request_sent_) {
-            if (!client_->wait_for_service(std::chrono::milliseconds(0))) {
-                RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000, "Service /get_low_level_plan not available, waiting...");
-                return BT::NodeStatus::RUNNING;
-            }
-            auto req = std::make_shared<robocon_interfaces::srv::GetLowLevelPlan::Request>();
-            
-            std::string seq, params;
-            getInput("sequence_in", seq);
-            getInput("params_in", params);
-            req->sequence_name = seq;
-            req->sequence_params_json = params;
-
-            future_ = client_->async_send_request(req).future.share();
-            request_sent_ = true;
-            return BT::NodeStatus::RUNNING;
-        }
-
-        if (future_.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-            request_sent_ = false;
-            try {
-                auto result = future_.get();
-                // Join the arrays into a comma separated string for the BT port
-                std::string subseq_str = "";
-                for(const auto& s : result->subsequences) subseq_str += s + ",";
-                
-                std::string params_str = "";
-                for(const auto& p : result->subsequence_params_json) params_str += p + "||";
-
-                setOutput("subseqs_out", subseq_str);
-                setOutput("subseq_params_out", params_str);
-                return BT::NodeStatus::SUCCESS;
-            } catch (...) {
-                return BT::NodeStatus::FAILURE;
-            }
-        }
-        return BT::NodeStatus::RUNNING;
-    }
-
-    void halt() override { request_sent_ = false; }
-
-private:
-    rclcpp::Node::SharedPtr node_;
-    rclcpp::Client<robocon_interfaces::srv::GetLowLevelPlan>::SharedPtr client_;
-    std::shared_future<robocon_interfaces::srv::GetLowLevelPlan::Response::SharedPtr> future_;
+    rclcpp::Client<robocon_interfaces::srv::GetPlan>::SharedPtr client_;
+    std::shared_future<robocon_interfaces::srv::GetPlan::Response::SharedPtr> future_;
     bool request_sent_;
 };
 
@@ -803,9 +925,56 @@ public:
 
     void onHalted() override {}
 
-private:
     std::chrono::time_point<std::chrono::steady_clock> start_time_;
     std::chrono::seconds wait_time_;
+};
+
+class SyncZoneState : public BT::SyncActionNode
+{
+public:
+    SyncZoneState(const std::string& name, const BT::NodeConfiguration& config, std::shared_ptr<rclcpp::Node> node)
+        : BT::SyncActionNode(name, config), node_(node)
+    {
+        sub_ = node_->create_subscription<robocon_interfaces::msg::ZoneState>(
+            "/current_zone", 10,
+            [this](const robocon_interfaces::msg::ZoneState::SharedPtr msg) {
+                last_msg_ = msg;
+            });
+    }
+
+    static BT::PortsList providedPorts()
+    {
+        return {
+            BT::OutputPort<int>("current_block_id"),
+            BT::OutputPort<int>("current_facing_block_id")
+        };
+    }
+
+    BT::NodeStatus tick() override
+    {
+        if (last_msg_) {
+            if (last_msg_->global_zone == "meihua_forest") {
+                if (last_msg_->local_zone.find("block_") == 0) {
+                    try {
+                        int b_id = std::stoi(last_msg_->local_zone.substr(6));
+                        setOutput("current_block_id", b_id);
+                    } catch (...) {}
+                }
+                if (last_msg_->facing_block.find("block_") == 0) {
+                    try {
+                        int f_id = std::stoi(last_msg_->facing_block.substr(6));
+                        setOutput("current_facing_block_id", f_id);
+                    } catch (...) {}
+                }
+            }
+        }
+        return BT::NodeStatus::SUCCESS;
+    }
+
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    rclcpp::Subscription<robocon_interfaces::msg::ZoneState>::SharedPtr sub_;
+    robocon_interfaces::msg::ZoneState::SharedPtr last_msg_;
 };
 
 int main(int argc, char **argv)
@@ -831,19 +1000,16 @@ int main(int argc, char **argv)
             return std::make_unique<MoveToLocation>(name, config, node);
         });
 
-    factory.registerBuilder<DetectKFS>("DetectKFS", 
+    factory.registerNodeType<ParseTargetBlockId>("ParseTargetBlockId");
+
+    factory.registerBuilder<ScanBlock>("ScanBlock", 
         [node](const std::string& name, const BT::NodeConfiguration& config) {
-            return std::make_unique<DetectKFS>(name, config, node);
+            return std::make_unique<ScanBlock>(name, config, node);
         });
 
-    factory.registerBuilder<GetHighLevelPlan>("GetHighLevelPlan", 
+    factory.registerBuilder<GetPlan>("GetPlan", 
         [node](const std::string& name, const BT::NodeConfiguration& config) {
-            return std::make_unique<GetHighLevelPlan>(name, config, node);
-        });
-
-    factory.registerBuilder<GetLowLevelPlan>("GetLowLevelPlan", 
-        [node](const std::string& name, const BT::NodeConfiguration& config) {
-            return std::make_unique<GetLowLevelPlan>(name, config, node);
+            return std::make_unique<GetPlan>(name, config, node);
         });
 
     factory.registerBuilder<ExecuteLowLevelPlan>("ExecuteLowLevelPlan", 
@@ -861,15 +1027,30 @@ int main(int argc, char **argv)
             return std::make_unique<ExecutePickKFS>(name, config, node);
         });
 
+    factory.registerBuilder<MoveToBlock>("MoveToBlock", 
+        [node](const std::string& name, const BT::NodeConfiguration& config) {
+            return std::make_unique<MoveToBlock>(name, config, node);
+        });
+
     factory.registerBuilder<ExecuteFaceDirection>("ExecuteFaceDirection", 
         [node](const std::string& name, const BT::NodeConfiguration& config) {
             return std::make_unique<ExecuteFaceDirection>(name, config, node);
+        });
+
+    factory.registerBuilder<ExecutePlaceKFS>("ExecutePlaceKFS", 
+        [node](const std::string& name, const BT::NodeConfiguration& config) {
+            return std::make_unique<ExecutePlaceKFS>(name, config, node);
         });
 
     factory.registerNodeType<CheckString>("CheckString");
     factory.registerNodeType<WaitDuration>("WaitDuration");
     factory.registerNodeType<IncrementCount>("IncrementCount");
     factory.registerNodeType<CheckCount>("CheckCount");
+
+    factory.registerBuilder<SyncZoneState>("SyncZoneState", 
+        [node](const std::string& name, const BT::NodeConfiguration& config) {
+            return std::make_unique<SyncZoneState>(name, config, node);
+        });
 
     // Load the XML file
     std::string xml_file = "/home/robot/robocon_ws/src/robocon_behaviour/behavior_trees/mission.xml";

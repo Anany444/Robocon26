@@ -101,7 +101,6 @@ def generate_launch_description():
         executable="spawner",
         arguments=["mecanum_drive_controller"],
     )
-
     load_extrusion_controller = Node(
         package="controller_manager",
         executable="spawner",
@@ -132,6 +131,7 @@ def generate_launch_description():
         ],
         output="screen",
     )
+
     gui_node = Node(
         package='robocon_controller',
         executable='gui_node',
@@ -163,16 +163,18 @@ def generate_launch_description():
         package='robocon_state',
         executable='zone_publisher',
         name='zone_publisher',
-        output='screen'
+        output='screen',
+        parameters=[{'use_sim_time': True}]
     )
 
     # 13. Mission Executor (Behavior Tree)
-    # mission_executor_node = Node(
-    #     package='robocon_behaviour',
-    #     executable='mission_executor',
-    #     name='mission_executor',
-    #     output='screen'
-    # )
+    mission_executor_node = Node(
+        package='robocon_behaviour',
+        executable='mission_executor',
+        name='mission_executor',
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
 
     # 14. Goal Pose Controller
     goal_pose_controller_node = Node(
@@ -183,12 +185,13 @@ def generate_launch_description():
     )
 
     # 15. Planner Node (Replaced by 3-tier terminals)
-    # planner_node = Node(
-    #     package='robocon_planner',
-    #     executable='planner_node',
-    #     name='planner_node',
-    #     output='screen'
-    # )
+    planner_node = Node(
+        package='robocon_planner',
+        executable='planner_node',
+        name='planner_node',
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
     # 16. Vision Node
     vision_node = Node(
         package='robocon_vision',
@@ -222,9 +225,9 @@ def generate_launch_description():
         # icp_odom_launch,
         # ekf_node,
         zone_publisher_node,
-        # mission_executor_node, # Run manually in terminal
+        mission_executor_node, 
         goal_pose_controller_node,
-        # planner_node, # Run manually in terminals
+        planner_node, 
         vision_node,
         controller_node
     ])

@@ -27,9 +27,9 @@ class GoalPoseController(Node):
         
         # Controller gains
         self.kp_linear = 1.0
-        self.kp_angular = 2.0
+        self.kp_angular = 20.0
         self.max_linear = 1.0
-        self.max_angular = 1.0
+        self.max_angular = 2.0
         
         self.final_distance_tolerance = 0.1
         self.intermediate_distance_tolerance = 0.3
@@ -129,6 +129,8 @@ class GoalPoseController(Node):
             # Align smoothly to target yaw while translating
             twist.angular.z = max(min(self.kp_angular * align_yaw_error, self.max_angular), -self.max_angular)
             
+            
+
         self.cmd_vel_pub.publish(twist)
 
 def main(args=None):

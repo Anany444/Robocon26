@@ -1,26 +1,16 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='utf-8'?>
 <sdf version="1.8">
   <world name="robocon_world">
-    <plugin
-      filename="gz-sim-sensors-system"
-      name="gz::sim::systems::Sensors">
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <plugin
-      filename="gz-sim-physics-system"
-      name="gz::sim::systems::Physics">
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics">
     </plugin>
-    <plugin
-      filename="gz-sim-user-commands-system"
-      name="gz::sim::systems::UserCommands">
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands">
     </plugin>
-    <plugin
-      filename="gz-sim-scene-broadcaster-system"
-      name="gz::sim::systems::SceneBroadcaster">
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster">
     </plugin>
-    <plugin
-      filename="gz-sim-imu-system"
-      name="gz::sim::systems::Imu">
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu">
     </plugin>
 
     
@@ -28,7 +18,7 @@
       <ambient>0.6 0.6 0.6 1.0</ambient>
       <background>0.7 0.7 0.7 1</background>
       <shadows>true</shadows>
-      <!-- <sky></sky> -->
+      
     </scene>
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -93,10 +83,10 @@
         </collision>
       </link>
     </model>
-    <!-- To toggle the scrolls, just change 'model' to 'disabled_model' -->
+    
 
     <model name="all_kungfu_scrolls">
-      <!-- <pose>0 0 -50 0 0 0</pose>  -->
+      
       <model name="kungfu_scroll_12">
         <pose>1.825 1.400 0.375 0 0 0</pose>
         <link name="link">
@@ -117,7 +107,7 @@
               <specular>0.2 0.2 0.2 1.0</specular>
             </material>
           </visual>
-          <!-- Top -->
+          
           <visual name="visual_top">
             <cast_shadows>false</cast_shadows>
             <pose>0 0 0.176 0 0 0</pose>
@@ -126,7 +116,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Front -->
+          
           <visual name="visual_front">
             <cast_shadows>false</cast_shadows>
             <pose>0.176 0 0 0 0 0</pose>
@@ -135,7 +125,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Back -->
+          
           <visual name="visual_back">
             <cast_shadows>false</cast_shadows>
             <pose>-0.176 0 0 0 0 0</pose>
@@ -144,7 +134,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Left -->
+          
           <visual name="visual_left">
             <cast_shadows>false</cast_shadows>
             <pose>0 0.176 0 0 0 0</pose>
@@ -153,7 +143,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Right -->
+          
           <visual name="visual_right">
             <cast_shadows>false</cast_shadows>
             <pose>0 -0.176 0 0 0 0</pose>
@@ -184,7 +174,7 @@
               <specular>0.2 0.2 0.2 1.0</specular>
             </material>
           </visual>
-          <!-- Top -->
+          
           <visual name="visual_top">
             <cast_shadows>false</cast_shadows>
             <pose>0 0 0.176 0 0 0</pose>
@@ -193,7 +183,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Front -->
+          
           <visual name="visual_front">
             <cast_shadows>false</cast_shadows>
             <pose>0.176 0 0 0 0 0</pose>
@@ -202,7 +192,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Back -->
+          
           <visual name="visual_back">
             <cast_shadows>false</cast_shadows>
             <pose>-0.176 0 0 0 0 0</pose>
@@ -211,7 +201,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Left -->
+          
           <visual name="visual_left">
             <cast_shadows>false</cast_shadows>
             <pose>0 0.176 0 0 0 0</pose>
@@ -220,147 +210,13 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Right -->
+          
           <visual name="visual_right">
             <cast_shadows>false</cast_shadows>
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-        </link>
-      </model>
-      <model name="kungfu_scroll_10">
-        <pose>4.225 1.400 0.375 0 0 0</pose>
-        <link name="link">
-          <inertial>
-            <mass>0.63</mass>
-            <inertia>
-              <ixx>0.0128</ixx><iyy>0.0128</iyy><izz>0.0128</izz>
-            </inertia>
-          </inertial>
-          <collision name="collision">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-          </collision>
-          <visual name="visual">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1.0 0.0 0.0 1.0</ambient>
-              <diffuse>1.0 0.0 0.0 1.0</diffuse>
-              <specular>0.2 0.2 0.2 1.0</specular>
-            </material>
-          </visual>
-          <!-- Top -->
-          <visual name="visual_top">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0 0.176 0 0 0</pose>
-            <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Front -->
-          <visual name="visual_front">
-            <cast_shadows>false</cast_shadows>
-            <pose>0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Back -->
-          <visual name="visual_back">
-            <cast_shadows>false</cast_shadows>
-            <pose>-0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Left -->
-          <visual name="visual_left">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Right -->
-          <visual name="visual_right">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 -0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-        </link>
-      </model>
-      <model name="kungfu_scroll_3">
-        <pose>1.825 -2.200 0.575 0 0 0</pose>
-        <link name="link">
-          <inertial>
-            <mass>0.63</mass>
-            <inertia>
-              <ixx>0.0128</ixx><iyy>0.0128</iyy><izz>0.0128</izz>
-            </inertia>
-          </inertial>
-          <collision name="collision">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-          </collision>
-          <visual name="visual">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1.0 0.0 0.0 1.0</ambient>
-              <diffuse>1.0 0.0 0.0 1.0</diffuse>
-              <specular>0.2 0.2 0.2 1.0</specular>
-            </material>
-          </visual>
-          <!-- Top -->
-          <visual name="visual_top">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0 0.176 0 0 0</pose>
-            <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Front -->
-          <visual name="visual_front">
-            <cast_shadows>false</cast_shadows>
-            <pose>0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Back -->
-          <visual name="visual_back">
-            <cast_shadows>false</cast_shadows>
-            <pose>-0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Left -->
-          <visual name="visual_left">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Right -->
-          <visual name="visual_right">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 -0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -385,7 +241,7 @@
               <specular>0.2 0.2 0.2 1.0</specular>
             </material>
           </visual>
-          <!-- Top -->
+          
           <visual name="visual_top">
             <cast_shadows>false</cast_shadows>
             <pose>0 0 0.176 0 0 0</pose>
@@ -394,7 +250,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Front -->
+          
           <visual name="visual_front">
             <cast_shadows>false</cast_shadows>
             <pose>0.176 0 0 0 0 0</pose>
@@ -403,7 +259,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Back -->
+          
           <visual name="visual_back">
             <cast_shadows>false</cast_shadows>
             <pose>-0.176 0 0 0 0 0</pose>
@@ -412,7 +268,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Left -->
+          
           <visual name="visual_left">
             <cast_shadows>false</cast_shadows>
             <pose>0 0.176 0 0 0 0</pose>
@@ -421,80 +277,13 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Right -->
+          
           <visual name="visual_right">
             <cast_shadows>false</cast_shadows>
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-        </link>
-      </model>
-      <model name="kungfu_scroll_7">
-        <pose>4.225 0.200 0.575 0 0 0</pose>
-        <link name="link">
-          <inertial>
-            <mass>0.63</mass>
-            <inertia>
-              <ixx>0.0128</ixx><iyy>0.0128</iyy><izz>0.0128</izz>
-            </inertia>
-          </inertial>
-          <collision name="collision">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-          </collision>
-          <visual name="visual">
-            <geometry><box><size>0.35 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1.0 0.0 0.0 1.0</ambient>
-              <diffuse>1.0 0.0 0.0 1.0</diffuse>
-              <specular>0.2 0.2 0.2 1.0</specular>
-            </material>
-          </visual>
-          <!-- Top -->
-          <visual name="visual_top">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0 0.176 0 0 0</pose>
-            <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Front -->
-          <visual name="visual_front">
-            <cast_shadows>false</cast_shadows>
-            <pose>0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Back -->
-          <visual name="visual_back">
-            <cast_shadows>false</cast_shadows>
-            <pose>-0.176 0 0 0 0 0</pose>
-            <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Left -->
-          <visual name="visual_left">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
-            </material>
-          </visual>
-          <!-- Right -->
-          <visual name="visual_right">
-            <cast_shadows>false</cast_shadows>
-            <pose>0 -0.176 0 0 0 0</pose>
-            <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
-            <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r1/robocon_logo_red_bg.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -519,7 +308,7 @@
               <specular>0.2 0.2 0.2 1.0</specular>
             </material>
           </visual>
-          <!-- Top -->
+          
           <visual name="visual_top">
             <cast_shadows>false</cast_shadows>
             <pose>0 0 0.176 0 0 0</pose>
@@ -528,7 +317,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Front -->
+          
           <visual name="visual_front">
             <cast_shadows>false</cast_shadows>
             <pose>0.176 0 0 0 0 0</pose>
@@ -537,7 +326,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Back -->
+          
           <visual name="visual_back">
             <cast_shadows>false</cast_shadows>
             <pose>-0.176 0 0 0 0 0</pose>
@@ -546,7 +335,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Left -->
+          
           <visual name="visual_left">
             <cast_shadows>false</cast_shadows>
             <pose>0 0.176 0 0 0 0</pose>
@@ -555,7 +344,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Right -->
+          
           <visual name="visual_right">
             <cast_shadows>false</cast_shadows>
             <pose>0 -0.176 0 0 0 0</pose>
@@ -586,7 +375,7 @@
               <specular>0.2 0.2 0.2 1.0</specular>
             </material>
           </visual>
-          <!-- Top -->
+          
           <visual name="visual_top">
             <cast_shadows>false</cast_shadows>
             <pose>0 0 0.176 0 0 0</pose>
@@ -595,7 +384,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Front -->
+          
           <visual name="visual_front">
             <cast_shadows>false</cast_shadows>
             <pose>0.176 0 0 0 0 0</pose>
@@ -604,7 +393,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Back -->
+          
           <visual name="visual_back">
             <cast_shadows>false</cast_shadows>
             <pose>-0.176 0 0 0 0 0</pose>
@@ -613,7 +402,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Left -->
+          
           <visual name="visual_left">
             <cast_shadows>false</cast_shadows>
             <pose>0 0.176 0 0 0 0</pose>
@@ -622,7 +411,7 @@
               <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
-          <!-- Right -->
+          
           <visual name="visual_right">
             <cast_shadows>false</cast_shadows>
             <pose>0 -0.176 0 0 0 0</pose>

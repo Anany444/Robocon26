@@ -116,6 +116,25 @@ blue_team:
         - 3.3
       height: 0.0
     blocks:
+      block_0:
+        x_min: -3.6
+        x_max: -2.4
+        y_min: -4.0
+        y_max: -2.8
+        vertices:
+          p0:
+          - -3.6
+          - -4.0
+          p1:
+          - -2.4
+          - -4.0
+          p2:
+          - -2.4
+          - -2.8
+          p3:
+          - -3.6
+          - -2.8
+        height: 0.0
       block_1:
         x_min: -2.4
         x_max: -1.2
@@ -344,6 +363,44 @@ blue_team:
           - -4.8
           - 2.0
         height: 0.2
+      block_13:
+        x_min: -4.8
+        x_max: -3.6
+        y_min: 2.0
+        y_max: 3.2
+        vertices:
+          p0:
+          - -4.8
+          - 2.0
+          p1:
+          - -3.6
+          - 2.0
+          p2:
+          - -3.6
+          - 3.2
+          p3:
+          - -4.8
+          - 3.2
+        height: 0.0
+      block_14:
+        x_min: -2.4
+        x_max: -1.2
+        y_min: 2.0
+        y_max: 3.2
+        vertices:
+          p0:
+          - -2.4
+          - 2.0
+          p1:
+          - -1.2
+          - 2.0
+          p2:
+          - -1.2
+          - 3.2
+          p3:
+          - -2.4
+          - 3.2
+        height: 0.0
   arena:
     full_zone:
       x_min: -6.0
@@ -524,6 +581,25 @@ red_team:
         - 3.3
       height: 0.0
     blocks:
+      block_0:
+        x_min: 2.4
+        x_max: 3.6
+        y_min: -4.0
+        y_max: -2.8
+        vertices:
+          p0:
+          - 2.4
+          - -4.0
+          p1:
+          - 3.6
+          - -4.0
+          p2:
+          - 3.6
+          - -2.8
+          p3:
+          - 2.4
+          - -2.8
+        height: 0.0
       block_3:
         x_min: 1.2
         x_max: 2.4
@@ -752,6 +828,44 @@ red_team:
           - 3.6
           - 2.0
         height: 0.2
+      block_13:
+        x_min: 3.6
+        x_max: 4.8
+        y_min: 2.0
+        y_max: 3.2
+        vertices:
+          p0:
+          - 3.6
+          - 2.0
+          p1:
+          - 4.8
+          - 2.0
+          p2:
+          - 4.8
+          - 3.2
+          p3:
+          - 3.6
+          - 3.2
+        height: 0.0
+      block_14:
+        x_min: 1.2
+        x_max: 2.4
+        y_min: 2.0
+        y_max: 3.2
+        vertices:
+          p0:
+          - 1.2
+          - 2.0
+          p1:
+          - 2.4
+          - 2.0
+          p2:
+          - 2.4
+          - 3.2
+          p3:
+          - 1.2
+          - 3.2
+        height: 0.0
   arena:
     full_zone:
       x_min: 0.0

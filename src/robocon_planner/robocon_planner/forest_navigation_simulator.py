@@ -16,16 +16,17 @@ class ForestSimApp(QMainWindow):
         self.start_kfs_state = {i: "none" for i in range(1, 13)}
         self.known_maze = {i: "unknown" for i in range(1, 13)}
         self.robot_pos = (4, 1) # Start at block 2 approach
+        self.orientation = (-1, 0) # Facing North
         self.kfs_count = 0
         self.running = False
         self.log_msgs = []
         self.path_history = [(4, 1)]
         
         self.BLOCKS = {
-            10: (0, 0), 11: (0, 1), 12: (0, 2),
-            7:  (1, 0), 8:  (1, 1), 9:  (1, 2),
-            4:  (2, 0), 5:  (2, 1), 6:  (2, 2),
-            1:  (3, 0), 2:  (3, 1), 3:  (3, 2)
+            12: (0, 0), 11: (0, 1), 10: (0, 2),
+            9:  (1, 0), 8:  (1, 1), 7:  (1, 2),
+            6:  (2, 0), 5:  (2, 1), 4:  (2, 2),
+            3:  (3, 0), 2:  (3, 1), 1:  (3, 2)
         }
         self.COORDS_TO_BLOCK = {v: k for k, v in self.BLOCKS.items()}
         
@@ -201,6 +202,7 @@ class ForestSimApp(QMainWindow):
         self.timer.stop()
         self.running = False
         self.robot_pos = (4, 1)
+        self.orientation = (-1, 0)
         self.path_history = [(4, 1)]
         self.kfs_count = 0
         self.log_msgs.clear()
@@ -309,25 +311,27 @@ class ForestSimApp(QMainWindow):
                     passable = True
                 elif kfs == "r1":
                     passable = True
-                    move_cost = 2.5 # Base 1.0 + 1.5 wait penalty
+                    move_cost = 6.0 # Wait penalty
                 elif kfs == "r2_real" and self.kfs_count == 2:
                     # Can we relocate it? Need an adjacent empty space
                     adjacents = [(nr+1, nc), (nr, nc-1), (nr, nc+1), (nr-1, nc)]
                     for adj in adjacents:
                         if adj != (r, c) and get_inferred_state(adj) in ["none", "boundary"]:
                             passable = True
-                            move_cost = 3.0 # Base 1.0 + 2.0 relocate penalty (worse than wait)
+                            if known_fake < 1:
+                                move_cost = 4.0 # Encourage pushing center blocks to find fake
+                            else:
+                                move_cost = 20.0 # Relocating is heavily penalized (waiting is better)
                             break
                             
                 if passable:
-                    # Center Column Strategy: Staying in Col 1 maximizes routing options (can go to 10 or 12).
-                    # Penalize leaving the center column early so it prefers going straight to Block 8 before turning.
+                    # Center Column Strategy: Soft preference for the center
                     if nc != 1 and target != (-1, 1): 
-                        move_cost += 5.0
+                        move_cost += 2.0
                         
-                    # Sideways movement (detours) is extremely expensive
+                    # Sideways movement penalty
                     if nc != c:
-                        move_cost += 10.0 # Moving > Relocating > Waiting
+                        move_cost += 3.0
                         # Apply team bias as a tie-breaker when a detour is forced
                         if self.team == "Red":
                             if nc > c: move_cost -= 0.1
@@ -384,9 +388,15 @@ class ForestSimApp(QMainWindow):
                         return True
                 self.log("Cannot relocate r2_real, no empty adjacent blocks!")
                 return False
+        elif kfs == "r1":
+            self.log(f"Waiting for r1 at Block {self.COORDS_TO_BLOCK.get(target, target)} to be removed...")
+            return False
         return False
         
     def move_to(self, pos):
+        if pos != self.robot_pos:
+            self.orientation = (pos[0] - self.robot_pos[0], pos[1] - self.robot_pos[1])
+            
         self.robot_pos = pos
         if pos not in self.path_history:
             self.path_history.append(pos)
@@ -410,29 +420,50 @@ class ForestSimApp(QMainWindow):
         
         if r == 4:
             target = (3, 1) # Block 2
+            
+            # Scan Blocks 1, 2, 3 before entering
+            for nc in [0, 1, 2]:
+                nr = 3
+                if (nr, nc) in self.COORDS_TO_BLOCK:
+                    block_id = self.COORDS_TO_BLOCK[(nr, nc)]
+                    self.known_maze[block_id] = self.kfs_state[block_id]
+            self.grid_widget_right.update()
+            
             # Entrance rule: we must move onto Block 2 to start.
             if not self.try_move(target):
                 self.log(f"Waiting to enter Block 2 (blocked by {self.check_block(target)}).")
             return
             
-        # Target block is (r-1, c) (Front is UP)
-        front = (r-1, c)
-        left = (r, c-1)
-        right = (r, c+1)
+        dr, dc = self.orientation
         
-        # 0. SENSOR SCAN PHASE (Update memory with adjacent blocks)
-        for nr, nc in [front, left, right]:
+        # Calculate vision targets (the 3 blocks in the row/col ahead of the robot)
+        front_r, front_c = r + dr, c + dc
+        vision_front = (front_r, front_c)
+        if dr != 0: # Facing North (-1,0) or South (1,0)
+            vision_left = (front_r, front_c + dr)
+            vision_right = (front_r, front_c - dr)
+        else: # Facing East (0,1) or West (0,-1)
+            vision_left = (front_r - dc, front_c)
+            vision_right = (front_r + dc, front_c)
+        
+        # 0. SENSOR SCAN PHASE (Update memory with vision pipeline)
+        for nr, nc in [vision_front, vision_left, vision_right]:
             if (nr, nc) in self.COORDS_TO_BLOCK:
                 block_id = self.COORDS_TO_BLOCK[(nr, nc)]
                 self.known_maze[block_id] = self.kfs_state[block_id]
         self.grid_widget_right.update()
+        
+        # Calculate physical adjacent blocks for harvesting and movement
+        adj_front = (r + dr, c + dc)
+        adj_right = (r + dc, c - dr)
+        adj_left = (r - dc, c + dr)
         
         # 1. HARVEST PHASE (Pick adjacent KFS without moving base)
         if self.kfs_count < 2:
             self.log(f"Scanning adjacent blocks from Block {self.COORDS_TO_BLOCK.get((r,c), (r,c))}...")
             
             # Scan order depends on team symmetry
-            scan_order = [("Front", front), ("Right", right), ("Left", left)] if self.team == "Red" else [("Front", front), ("Left", left), ("Right", right)]
+            scan_order = [("Front", adj_front), ("Right", adj_right), ("Left", adj_left)] if self.team == "Red" else [("Front", adj_front), ("Left", adj_left), ("Right", adj_right)]
             
             for d, target in scan_order:
                 if self.check_block(target) == "r2_real":
@@ -441,11 +472,11 @@ class ForestSimApp(QMainWindow):
                     return # End step, we harvested this tick. Wait for next tick to decide next move.
         
         # 2. MOVEMENT PHASE (Seek Exit or Harvest)
-        if self.kfs_count == 2 and self.check_block(front) == "exit":
+        if self.kfs_count == 2 and self.check_block(adj_front) == "exit":
             self.log("Exited the forest!")
             self.status_lbl.setText(f"Status: Exited! (KFS: {self.kfs_count})")
             self.running = False
-            self.move_to(front)
+            self.move_to(adj_front)
             return
             
         best_target = self.get_best_move()
@@ -511,7 +542,16 @@ class ForestSimApp(QMainWindow):
         painter.setBrush(QBrush(QColor("purple")))
         painter.setPen(QPen(Qt.white, 2))
         painter.drawEllipse(int(x - 20), int(y - 20), 40, 40)
-        painter.drawText(int(x - 10), int(y + 5), "R2")
+        
+        # Draw orientation indicator
+        dr, dc = getattr(self, 'orientation', (-1, 0))
+        ex = x + dc * 15
+        ey = y + dr * 15
+        painter.setPen(QPen(Qt.yellow, 4))
+        painter.drawLine(int(x), int(y), int(ex), int(ey))
+        
+        painter.setPen(QPen(Qt.white, 2))
+        painter.drawText(int(x - 10), int(y + 25), "R2")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -9,7 +9,7 @@ controller_manager:
       type: mecanum_drive_controller/MecanumDriveController
 
     extrusion_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
+      type: position_controllers/JointGroupPositionController
 
     gripper_controller:
       type: position_controllers/JointGroupPositionController
@@ -42,11 +42,7 @@ extrusion_controller:
       - right_front_extrusion_joint
       - left_back_extrusion_joint
       - right_back_extrusion_joint
-    command_interfaces:
-      - position
-    state_interfaces:
-      - position
-      - velocity
+    interface_name: position
 
 gripper_controller:
   ros__parameters:

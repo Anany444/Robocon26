@@ -32,6 +32,7 @@ class RobotControlGUI(Node):
         
         # Velocity State
         self.linear_x = 0.0
+        self.linear_y = 0.0
         self.angular_z = 0.0
         
         # Timer for continuous velocity publishing
@@ -42,8 +43,11 @@ class RobotControlGUI(Node):
         self.gui_thread.start()
 
     def publish_velocity(self):
+        if self.linear_x == 0.0 and self.linear_y == 0.0 and self.angular_z == 0.0:
+            return # Don't continuously publish zeroes; let physics (gravity) take over
         msg = Twist()
         msg.linear.x = self.linear_x
+        msg.linear.y = self.linear_y
         msg.angular.z = self.angular_z
         self.cmd_vel_pub.publish(msg)
 
@@ -64,9 +68,14 @@ class RobotControlGUI(Node):
         self.traj_pub.publish(msg)
 
     # --- GUI Methods ---
-    def set_vel(self, linear, angular):
-        self.linear_x = float(linear)
-        self.angular_z = float(angular)
+    def set_vel(self, linear_x, linear_y, angular_z):
+        self.linear_x = float(linear_x)
+        self.linear_y = float(linear_y)
+        self.angular_z = float(angular_z)
+        if self.linear_x == 0.0 and self.linear_y == 0.0 and self.angular_z == 0.0:
+            # Publish exactly once to ensure it stops
+            msg = Twist()
+            self.cmd_vel_pub.publish(msg)
 
     def set_front(self, pos):
         self.front_pos = float(pos)
@@ -147,7 +156,9 @@ class RobotControlGUI(Node):
         btn_back = tk.Button(drive_frame, text="Backward", width=10, bg="lightpink")
         btn_left = tk.Button(drive_frame, text="Left", width=10, bg="lightblue")
         btn_right = tk.Button(drive_frame, text="Right", width=10, bg="lightblue")
-        btn_stop = tk.Button(drive_frame, text="STOP", width=10, bg="red", fg="white", command=lambda: self.set_vel(0, 0))
+        btn_rot_l = tk.Button(drive_frame, text="Rot L", width=10, bg="thistle")
+        btn_rot_r = tk.Button(drive_frame, text="Rot R", width=10, bg="thistle")
+        btn_stop = tk.Button(drive_frame, text="STOP", width=10, bg="red", fg="white", command=lambda: self.set_vel(0, 0, 0))
 
         # Grid Layout for Drive
         btn_fwd.grid(row=0, column=1, pady=5)
@@ -155,22 +166,30 @@ class RobotControlGUI(Node):
         btn_stop.grid(row=1, column=1, padx=5)
         btn_right.grid(row=1, column=2, padx=5)
         btn_back.grid(row=2, column=1, pady=5)
+        btn_rot_l.grid(row=3, column=0, pady=5)
+        btn_rot_r.grid(row=3, column=2, pady=5)
 
         # Bindings for Drive
         vel_linear = 1.0
         vel_angular = 1.0
 
-        btn_fwd.bind("<ButtonPress-1>", lambda e: self.set_vel(vel_linear, 0))
-        btn_fwd.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0))
+        btn_fwd.bind("<ButtonPress-1>", lambda e: self.set_vel(vel_linear, 0, 0))
+        btn_fwd.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
 
-        btn_back.bind("<ButtonPress-1>", lambda e: self.set_vel(-vel_linear, 0))
-        btn_back.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0))
+        btn_back.bind("<ButtonPress-1>", lambda e: self.set_vel(-vel_linear, 0, 0))
+        btn_back.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
 
-        btn_left.bind("<ButtonPress-1>", lambda e: self.set_vel(0, vel_angular))
-        btn_left.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0))
+        btn_left.bind("<ButtonPress-1>", lambda e: self.set_vel(0, vel_linear, 0))
+        btn_left.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
 
-        btn_right.bind("<ButtonPress-1>", lambda e: self.set_vel(0, -vel_angular))
-        btn_right.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0))
+        btn_right.bind("<ButtonPress-1>", lambda e: self.set_vel(0, -vel_linear, 0))
+        btn_right.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
+        
+        btn_rot_l.bind("<ButtonPress-1>", lambda e: self.set_vel(0, 0, vel_angular))
+        btn_rot_l.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
+        
+        btn_rot_r.bind("<ButtonPress-1>", lambda e: self.set_vel(0, 0, -vel_angular))
+        btn_rot_r.bind("<ButtonRelease-1>", lambda e: self.set_vel(0, 0, 0))
 
         # Extrusion Controls Frame
         ext_frame = tk.LabelFrame(root, text="Extrusion Mechanisms", padx=10, pady=10)
