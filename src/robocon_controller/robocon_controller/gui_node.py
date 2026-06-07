@@ -9,6 +9,11 @@ from std_msgs.msg import String
 import tkinter as tk
 from builtin_interfaces.msg import Duration
 import threading
+from sensor_msgs.msg import Image
+import numpy as np
+import cv2
+import os
+import datetime
 
 class RobotControlGUI(Node):
     def __init__(self):
@@ -27,6 +32,14 @@ class RobotControlGUI(Node):
         self.gripper_pos = 0.0
         self.arm_pos = 0.0
         
+        # Image saving
+        self.latest_image = None
+        self.image_sub = self.create_subscription(Image, '/camera/rgbd/image', self.image_callback, 10)
+        # Image Capture setup
+        from ament_index_python.packages import get_package_share_directory
+        self.save_dir = os.path.join(get_package_share_directory('robocon_vision'), 'test_images')
+        os.makedirs(self.save_dir, exist_ok=True)
+        
         # Service Clients
         self.trigger_move_forest_client = self.create_client(Trigger, '/trigger_move_to_forest')
         
@@ -41,6 +54,9 @@ class RobotControlGUI(Node):
         # Setup GUI in a separate thread
         self.gui_thread = threading.Thread(target=self.run_gui)
         self.gui_thread.start()
+
+    def image_callback(self, msg):
+        self.latest_image = msg
 
     def publish_velocity(self):
         if self.linear_x == 0.0 and self.linear_y == 0.0 and self.angular_z == 0.0:
@@ -132,10 +148,32 @@ class RobotControlGUI(Node):
         future = self.trigger_move_forest_client.call_async(req)
         self.get_logger().info("Called /trigger_move_to_forest")
 
+    def save_current_image(self):
+        if self.latest_image is None:
+            self.get_logger().warn("No image received yet!")
+            return
+            
+        try:
+            # Bypass cv_bridge to avoid NumPy 1.x/2.x compilation crash
+            img_msg = self.latest_image
+            img_arr = np.frombuffer(img_msg.data, dtype=np.uint8).reshape((img_msg.height, img_msg.width, -1))
+            
+            if img_msg.encoding == "rgb8":
+                img_arr = cv2.cvtColor(img_arr, cv2.COLOR_RGB2BGR)
+            elif img_msg.encoding == "rgba8":
+                img_arr = cv2.cvtColor(img_arr, cv2.COLOR_RGBA2BGR)
+                
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            filename = os.path.join(self.save_dir, f"img_{timestamp}.png")
+            cv2.imwrite(filename, img_arr)
+            self.get_logger().info(f"Saved image to {filename}")
+        except Exception as e:
+            self.get_logger().error(f"Failed to save image: {e}")
+
     def run_gui(self):
         root = tk.Tk()
         root.title("Robocon Control Panel")
-        root.geometry("450x750")
+        root.geometry("500x850")
         root.resizable(False, False)
 
         # Title
@@ -226,6 +264,8 @@ class RobotControlGUI(Node):
         tk.Button(vision_frame, text="R1 KFS", width=10, bg="pink", command=lambda: self.publish_mock_kfs("r1_kfs")).grid(row=0, column=1, padx=5, pady=2)
         tk.Button(vision_frame, text="R2 Real", width=10, bg="lightgreen", command=lambda: self.publish_mock_kfs("r2_kfs_real")).grid(row=0, column=2, padx=5, pady=2)
         tk.Button(vision_frame, text="R2 Fake", width=10, bg="yellow", command=lambda: self.publish_mock_kfs("r2_kfs_fake")).grid(row=0, column=3, padx=5, pady=2)
+        
+        tk.Button(vision_frame, text="Save RGB Image", width=25, bg="cyan", command=self.save_current_image).grid(row=1, column=0, columnspan=4, pady=10)
 
         def on_closing():
             root.destroy()

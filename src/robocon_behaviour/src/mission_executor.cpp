@@ -16,6 +16,7 @@ using namespace BT;
 #include <robocon_interfaces/srv/move_to_block.hpp>
 #include <robocon_interfaces/msg/zone_state.hpp>
 #include <nlohmann/json.hpp> // Assuming standard ROS 2 setup has nlohmann
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 // A helper function to parse simple JSON string array manually if nlohmann isn't present
 std::vector<std::string> parseStringArray(const std::string& str) {
@@ -1053,7 +1054,7 @@ int main(int argc, char **argv)
         });
 
     // Load the XML file
-    std::string xml_file = "/home/robot/robocon_ws/src/robocon_behaviour/behavior_trees/mission.xml";
+    std::string xml_file = ament_index_cpp::get_package_share_directory("robocon_behaviour") + "/behavior_trees/mission.xml";
     node->declare_parameter("bt_xml", xml_file);
     xml_file = node->get_parameter("bt_xml").as_string();
 

@@ -12,6 +12,11 @@ import time
 import math
 import yaml
 import os
+import torch
+import cv2
+import numpy as np
+from ultralytics import YOLO
+from sensor_msgs.msg import Image
 
 class KFSDetectionNode(Node):
     def __init__(self):
@@ -56,14 +61,91 @@ class KFSDetectionNode(Node):
         
         # Load map
         self.yaml_path = os.path.join(get_package_share_directory('robocon_bringup'), 'config', 'game_field_map.yaml')
-        ws_src_path = "/home/robot/robocon_ws/src/robocon_bringup/config/game_field_map.yaml"
-        if os.path.exists(ws_src_path):
-            self.yaml_path = ws_src_path
-            
+        
         self.cb_group = ReentrantCallbackGroup()
         self.srv = self.create_service(ScanBlock, '/scan_block', self.detection_callback, callback_group=self.cb_group)
         
-        self.get_logger().info("KFS Detection Node started (Continuous Vision).")
+        # Live Inferencing Setup
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.get_logger().info(f"Using device for YOLO: {self.device}")
+        
+        model_path = os.path.join(get_package_share_directory('robocon_vision'), 'models', 'rbcn5.pt')
+        if os.path.exists(model_path):
+            self.model = YOLO(model_path)
+            self.get_logger().info(f"Loaded YOLO model from {model_path}")
+        else:
+            self.model = None
+            self.get_logger().warn(f"Model not found at {model_path}!")
+            
+        self.latest_image = None
+        self.new_image = False
+        self.latest_kfs = "none"
+        self.image_sub = self.create_subscription(Image, '/camera/rgbd/image', self.image_callback, 10)
+        self.annotated_pub = self.create_publisher(Image, '/vision/annotated_image', 10)
+        
+        # Inference loop timer
+        self.inference_timer = self.create_timer(0.1, self.inference_loop)
+        
+        self.get_logger().info("KFS Detection Node started (Live Vision Active).")
+
+    def image_callback(self, msg):
+        self.latest_image = msg
+        self.new_image = True
+        
+    def inference_loop(self):
+        if self.latest_image is None or self.model is None or not getattr(self, 'new_image', False):
+            return
+            
+        self.new_image = False
+        try:
+            img_msg = self.latest_image
+            img_arr = np.frombuffer(img_msg.data, dtype=np.uint8).reshape((img_msg.height, img_msg.width, -1))
+            
+            if img_msg.encoding == "rgb8":
+                img_arr = cv2.cvtColor(img_arr, cv2.COLOR_RGB2BGR)
+            elif img_msg.encoding == "rgba8":
+                img_arr = cv2.cvtColor(img_arr, cv2.COLOR_RGBA2BGR)
+                
+            results = self.model(img_arr, device=self.device, half=True, verbose=False)
+            
+            detected_class = "none"
+            if len(results) > 0 and len(results[0].boxes) > 0:
+                best_box = results[0].boxes[0]
+                for box in results[0].boxes:
+                    if box.conf[0] > best_box.conf[0]:
+                        best_box = box
+                
+                class_id = int(best_box.cls[0].item())
+                detected_class = self.model.names[class_id]
+                
+                # Map standard YOLO classes to KFS classes if names differ
+                if detected_class.lower() == "r2_kfs_real" or "real" in detected_class.lower():
+                    detected_class = "r2_kfs_real"
+                elif detected_class.lower() == "r2_kfs_fake" or "fake" in detected_class.lower():
+                    detected_class = "r2_kfs_fake"
+                elif detected_class.lower() == "r1_kfs" or "r1" in detected_class.lower():
+                    detected_class = "r1_kfs"
+            
+            self.latest_kfs = detected_class
+            
+            # Publish annotated image
+            res_plotted = results[0].plot()
+            if img_msg.encoding == "rgb8":
+                res_plotted = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
+                
+            annotated_msg = Image()
+            annotated_msg.header = img_msg.header
+            annotated_msg.height = res_plotted.shape[0]
+            annotated_msg.width = res_plotted.shape[1]
+            annotated_msg.encoding = img_msg.encoding
+            annotated_msg.is_bigendian = img_msg.is_bigendian
+            annotated_msg.step = res_plotted.shape[1] * res_plotted.shape[2]
+            annotated_msg.data = res_plotted.tobytes()
+            
+            self.annotated_pub.publish(annotated_msg)
+            
+        except Exception as e:
+            self.get_logger().error(f"Inference error: {e}")
 
     def odom_callback(self, msg):
         self.current_x = msg.pose.pose.position.x
@@ -120,19 +202,23 @@ class KFSDetectionNode(Node):
                     self.mem_pub.publish(pub_msg)
 
     def detection_callback(self, request, response):
-        self.get_logger().info(f"Detection requested for block_{request.target_block_id}. Simulating 1s scan...")
-        time.sleep(1.0) # Mock delay
+        self.get_logger().info(f"Detection requested for block_{request.target_block_id}. Using live YOLO...")
+        time.sleep(0.5) # Allow half a second to capture any new frames
         
         target_id = f"block_{request.target_block_id}"
-        if target_id in self.KFS_MAP:
-            detected_type = self.KFS_MAP[target_id]
-            self.get_logger().info(f"Target block {target_id} detected: {detected_type}")
-            response.kfs_detected = detected_type
-            response.status = "success"
-        else:
-            self.get_logger().warn(f"Target block {target_id} not found in map!")
-            response.kfs_detected = "none"
-            response.status = "failed"
+        detected_type = self.latest_kfs
+        
+        # Fallback to map if no valid detection
+        if detected_type not in ["r1_kfs", "r2_kfs_real", "r2_kfs_fake"]:
+            self.get_logger().warn(f"Live detection '{detected_type}' invalid or none. Falling back to mock map.")
+            if target_id in self.KFS_MAP:
+                detected_type = self.KFS_MAP[target_id]
+            else:
+                detected_type = "none"
+                
+        self.get_logger().info(f"Target block {target_id} finalized detection: {detected_type}")
+        response.kfs_detected = detected_type
+        response.status = "success"
             
         return response
 

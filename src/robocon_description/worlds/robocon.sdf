@@ -113,7 +113,7 @@
             <pose>0 0 0.176 0 0 0</pose>
             <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -122,7 +122,7 @@
             <pose>0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -131,7 +131,7 @@
             <pose>-0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -140,7 +140,7 @@
             <pose>0 0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -149,7 +149,7 @@
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_17.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -180,7 +180,7 @@
             <pose>0 0 0.176 0 0 0</pose>
             <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -189,7 +189,7 @@
             <pose>0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -198,7 +198,7 @@
             <pose>-0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -207,7 +207,7 @@
             <pose>0 0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -216,7 +216,7 @@
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/fake_kfs/kfs_logo_8.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -247,7 +247,7 @@
             <pose>0 0 0.176 0 0 0</pose>
             <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -256,7 +256,7 @@
             <pose>0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -265,7 +265,7 @@
             <pose>-0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -274,7 +274,7 @@
             <pose>0 0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -283,7 +283,7 @@
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_21.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -314,7 +314,7 @@
             <pose>0 0 0.176 0 0 0</pose>
             <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -323,7 +323,7 @@
             <pose>0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -332,7 +332,7 @@
             <pose>-0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -341,7 +341,7 @@
             <pose>0 0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -350,7 +350,7 @@
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_29.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>
@@ -381,7 +381,7 @@
             <pose>0 0 0.176 0 0 0</pose>
             <geometry><box><size>0.35 0.35 0.001</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -390,7 +390,7 @@
             <pose>0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -399,7 +399,7 @@
             <pose>-0.176 0 0 0 0 0</pose>
             <geometry><box><size>0.001 0.35 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -408,7 +408,7 @@
             <pose>0 0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
           
@@ -417,7 +417,7 @@
             <pose>0 -0.176 0 0 0 0</pose>
             <geometry><box><size>0.35 0.001 0.35</size></box></geometry>
             <material>
-              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>file:///home/robot/robocon_ws/src/robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
+              <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><pbr><metal><albedo_map>model://robocon_description/textures/r2/real_kfs/kfs_logo_30.png</albedo_map><roughness>0.9</roughness><metalness>0.1</metalness></metal></pbr>
             </material>
           </visual>
         </link>

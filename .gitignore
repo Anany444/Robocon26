@@ -6,6 +6,7 @@ test/
 utils/
 backups/
 docs/*
+datasets/
 !docs/ABU Robocon 2026 Rulebook V1.0.pdf
 !docs/Appendix V1.1.pdf
 **/__pycache__/

@@ -9,7 +9,10 @@ class ZonePublisher(Node):
     def __init__(self):
         super().__init__('zone_publisher')
         
-        self.declare_parameter('yaml_path', '/home/robot/robocon_ws/src/robocon_bringup/config/game_field_map.yaml')
+        from ament_index_python.packages import get_package_share_directory
+        import os
+        default_yaml = os.path.join(get_package_share_directory('robocon_bringup'), 'config', 'game_field_map.yaml')
+        self.declare_parameter('yaml_path', default_yaml)
         self.declare_parameter('team', 'red_team')
         
         yaml_path = self.get_parameter('yaml_path').value

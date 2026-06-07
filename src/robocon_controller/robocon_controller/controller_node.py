@@ -49,9 +49,6 @@ class ControllerNode(Node):
         
         # Load map
         self.yaml_path = os.path.join(get_package_share_directory('robocon_bringup'), 'config', 'game_field_map.yaml')
-        ws_src_path = "/home/robot/robocon_ws/src/robocon_bringup/config/game_field_map.yaml"
-        if os.path.exists(ws_src_path):
-            self.yaml_path = ws_src_path
             
         self.get_logger().info("Controller Node initialized and ready.")
 
@@ -432,9 +429,6 @@ class ControllerNode(Node):
         # Reload YAML dynamically so live edits apply immediately!
         try:
             loc_yaml_path = os.path.join(get_package_share_directory('robocon_bringup'), 'config', 'locations.yaml')
-            ws_src_path = "/home/robot/robocon_ws/src/robocon_bringup/config/locations.yaml"
-            if os.path.exists(ws_src_path):
-                loc_yaml_path = ws_src_path
                 
             with open(loc_yaml_path, 'r') as f:
                 config = yaml.safe_load(f)

@@ -9,7 +9,7 @@ from std_msgs.msg import String
 
 class HighLevelPlanner(Node):
     def __init__(self):
-        super().__init__('high_level_planner')
+        super().__init__('planner_node')
         
         self.srv = self.create_service(GetPlan, '/get_plan', self.plan_callback)
         self.mem_sub = self.create_subscription(String, '/planner/update_memory', self.memory_callback, 10)

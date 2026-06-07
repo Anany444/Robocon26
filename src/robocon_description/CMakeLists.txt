@@ -17,6 +17,6 @@ endif()
 ament_package()
 
 install(
-  DIRECTORY urdf worlds meshes
+  DIRECTORY urdf worlds meshes textures
   DESTINATION share/${PROJECT_NAME}/
 )
