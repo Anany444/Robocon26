@@ -7,6 +7,7 @@ utils/
 backups/
 docs/*
 datasets/
+3rd_party_pkgs/
 !docs/ABU Robocon 2026 Rulebook V1.0.pdf
 !docs/Appendix V1.1.pdf
 **/__pycache__/
