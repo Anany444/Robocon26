@@ -1,0 +1,6 @@
+[submodule "Robot_2/ros2_ws/src/3rd_party_pkgs/unilidar_sdk"]
+	path = Robot_2/ros2_ws/src/3rd_party_pkgs/unilidar_sdk
+	url = https://github.com/unitreerobotics/unilidar_sdk.git
+[submodule "Robot_2/ros2_ws/src/3rd_party_pkgs/point_lio_ros2"]
+	path = Robot_2/ros2_ws/src/3rd_party_pkgs/point_lio_ros2
+	url = https://github.com/dfloreaa/point_lio_ros2.git
