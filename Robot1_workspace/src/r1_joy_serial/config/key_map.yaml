@@ -1,0 +1,24 @@
+axes:
+  left_stick: 
+    ud: 0 #stick up down (for robot sideways motion : y axis)
+    lr: 1 #stick left right ( for robot forward backward motion : x axis)
+  right_stick: 
+    lr: 3 # stick left right
+    ud: 4 # stick up down = servo arm
+  dpad:
+    up/down: 13 #+1/-1 = weapon up/down
+    left/right: 12 #+1/-1 = weapon servo cw/ccw
+buttons:
+  A: 1 #down = arm down
+  B: 2 #right = weapon gripper +5 deg
+  X: 0 #left = weapon gripper close/open
+  Y: 3 #top = arm up
+  L1: 4 # = ccw
+  L2: 6 # = override
+  R1: 5 # =cw
+  R2: 7
+  left_stick_button: 10
+  right_stick_button: 11
+  Options: 9 # = arm gripper
+  Share: 8 # = weapon servo 90deg
+  On/Off: 12
