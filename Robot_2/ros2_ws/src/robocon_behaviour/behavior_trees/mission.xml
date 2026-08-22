@@ -1,0 +1,157 @@
+<root main_tree_to_execute="MainMissionTree">
+    <!-- The Root of our Mission -->
+    <BehaviorTree ID="MainMissionTree">
+        <Sequence name="MissionSequence">
+            
+            <!-- 1. Start the mission -->
+            <!-- <WaitServiceTrigger service_name="/trigger_start_mission" /> -->
+            
+            <!-- 2. Release spearhead -->
+            <!-- <WaitServiceTrigger service_name="/trigger_release_spearhead" /> -->
+            
+            <!-- 3. Move towards forest -->
+            <WaitServiceTrigger service_name="/trigger_move_to_forest" />
+            
+            <!-- Navigate to Checking Location -->
+            <MoveToLocation location_name="check_block2_kfs" />
+
+            <!-- Loop until we detect something that IS NOT r1_kfs -->
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <ScanBlock target_block_id="2" kfs_detected="{kfs_result}" status="{scan_status}"/>
+                    
+                    <!-- If it's r1_kfs, this sequence succeeds, so Inverter makes it FAIL (triggering a retry). -->
+                    <!-- If it's NOT r1_kfs, CheckString fails, Inverter makes it SUCCEED (breaking the retry loop). -->
+                    <Inverter>
+                        <Sequence>
+                            <CheckString value="{kfs_result}" target="r1_kfs"/>
+                            <WaitDuration sec="10"/>
+                        </Sequence>
+                    </Inverter>
+                </Sequence>
+            </RetryUntilSuccessful>
+
+            <!-- We now have a non-r1 kfs result. Move to approach location -->
+            <MoveToLocation location_name="block_0_center" />
+
+            <!-- Act based on KFS result -->
+            <Fallback>
+                <!-- Case 1: No KFS detected, climb block -->
+                <Sequence>
+                    <CheckString value="{kfs_result}" target="none"/>
+                    <MoveToBlock current_block_id="0" target_block_id="2" />
+                </Sequence>
+
+                <!-- Case 2: R2's KFS (real) detected, pick it up and then climb -->
+                <Sequence>
+                    <CheckString value="{kfs_result}" target="r2_kfs_real"/>
+                    <ExecutePickKFS current_block="0" target_block="2" />
+                    <UpdatePlannerMemory block_id="2" kfs_type="none"/>
+                    <IncrementCount count="{current_kfs_count}" />
+                    <MoveToBlock current_block_id="0" target_block_id="2" />
+                </Sequence>
+            </Fallback>
+            
+            <SetBlackboard output_key="current_block_id" value="2" />
+            <SetBlackboard output_key="current_facing_block_id" value="5" />
+
+            <!-- 3. Auto Explore Algorithm (Direct BT Architecture) -->
+            <RetryUntilSuccessful num_attempts="-1">
+                <Sequence>
+                    <!-- Sync real-world zone state into blackboard -->
+                    <SyncZoneState current_block_id="{current_block_id}" current_facing_block_id="{current_facing_block_id}" />
+                    
+                    <!-- Ask the Brain what the strategy is dynamically -->
+                    <GetPlan current_block_id="{current_block_id}" 
+                                      current_facing_block_id="{current_facing_block_id}" 
+                                      current_kfs_count="{current_kfs_count}" 
+                                      gripper_has_kfs="{gripper_has_kfs}" 
+                                      sequence_out="{hl_seq}" 
+                                      params_out="{hl_params}" />
+                    
+                    <!-- Directly map high-level sequence to hardware calls -->
+                    <Fallback>
+                        <!-- Harvest pick: pick KFS and increment count -->
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="pick_kfs_from_faced_block"/>
+                            <ExecutePickKFS current_block="{current_block_id}" target_block="{current_facing_block_id}" />
+                            <IncrementCount count="{current_kfs_count}" />
+                            <SetBlackboard output_key="gripper_has_kfs" value="true" />
+                        </Sequence>
+                        
+                        <!-- Relocate pick: pick KFS but do NOT increment count -->
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="relocate_pick_kfs"/>
+                            <ExecutePickKFS current_block="{current_block_id}" target_block="{current_facing_block_id}" />
+                            <SetBlackboard output_key="gripper_has_kfs" value="true" />
+                        </Sequence>
+                        
+                        <!-- Place the held KFS onto the faced block -->
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="place_picked_kfs_on_faced_block"/>
+                            <ParseTargetBlockId json_str="{hl_params}" block_id_out="{parsed_target_block_id}"/>
+                            <ExecutePlaceKFS current_block="{current_block_id}" target_block="{parsed_target_block_id}" />
+                            <SetBlackboard output_key="gripper_has_kfs" value="false" />
+                        </Sequence>
+                        
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="store_picked_kfs_on_bot"/>
+                            <CallTriggerService service_name="/trigger_store_kfs" />
+                            <SetBlackboard output_key="gripper_has_kfs" value="false" />
+                        </Sequence>
+                        
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="face_towards_an_adjacent_block"/>
+                            <ExecuteFaceDirection current_block_id="{current_block_id}" hl_params="{hl_params}" new_facing_block_id="{current_facing_block_id}" />
+                        </Sequence>
+                        
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="move_from_current_block_to_faced_block"/>
+                            <ParseTargetBlockId json_str="{hl_params}" block_id_out="{parsed_target_block_id}"/>
+                            <MoveToBlock current_block_id="{current_block_id}" target_block_id="{parsed_target_block_id}" />
+                            <SetBlackboard output_key="current_block_id" value="{parsed_target_block_id}" />
+                        </Sequence>
+                        
+                        <Sequence>
+                            <CheckString value="{hl_seq}" target="exit_forest"/>
+                            <ParseTargetBlockId json_str="{hl_params}" block_id_out="{parsed_target_block_id}"/>
+                            <MoveToBlock current_block_id="{current_block_id}" target_block_id="{parsed_target_block_id}" />
+                            <SetBlackboard output_key="current_block_id" value="{parsed_target_block_id}" />
+                            <!-- Exit the retry loop by returning SUCCESS and breaking out -->
+                            <ForceSuccess>
+                                <AlwaysSuccess/>
+                            </ForceSuccess>
+                        </Sequence>
+                        
+                        <!-- Fallback for unhandled sequences -->
+                        <Sequence>
+                            <WaitDuration sec="2.0"/>
+                        </Sequence>
+                    </Fallback>
+                    
+                    <!-- If the sequence was exit_forest, this will succeed, breaking the Retry loop! -->
+                    <!-- Otherwise, it fails, forcing the Retry loop to continually ask the Brain for the next step. -->
+                    <CheckString value="{hl_seq}" target="exit_forest"/>
+                </Sequence>
+            </RetryUntilSuccessful>
+            
+            <!-- 4. Exit the forest -->
+            <!-- Note: The exit movement is now handled by the EXIT PATH inside the loop above. -->
+            <!-- <WaitServiceTrigger service_name="/trigger_exit_forest" /> -->
+            
+            <!-- 5. Enter arena through ramp -->
+            <!-- <WaitServiceTrigger service_name="/trigger_enter_arena" /> -->
+            <CallTriggerService service_name="/controller/all_extrusions_down" />
+            <MoveToLocation location_name="ramp_entrance" />
+            <MoveToLocation location_name="ramp_end_platform" />
+            <MoveToLocation location_name="tick_tack_toe_rack" />
+            
+            <!-- 6. Place scroll -->
+            <WaitServiceTrigger service_name="/trigger_place_scroll" />
+            
+            <!-- 7. Get into lifting position -->
+            <WaitServiceTrigger service_name="/trigger_prepare_lift" />
+
+        </Sequence>
+    </BehaviorTree>
+</root>
