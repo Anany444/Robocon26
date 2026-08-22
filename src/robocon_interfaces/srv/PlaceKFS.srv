@@ -1,5 +1,0 @@
-int32 current_block_id
-int32 target_block_id
----
-bool success
-string message

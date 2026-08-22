@@ -1,4 +1,0 @@
-int32 target_block_id
----
-string kfs_detected
-string status
