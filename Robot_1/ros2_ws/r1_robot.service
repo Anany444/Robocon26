@@ -1,0 +1,14 @@
+[Unit]
+Description=R1 Robocon ROS 2 Bringup Service
+After=network.target systemd-udevd.service
+
+[Service]
+Type=simple
+User=rpi
+WorkingDirectory=/home/rpi/ros2_ws/
+ExecStart=/bin/bash /home/rpi/ros2_ws/src/start_r1_robot.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
