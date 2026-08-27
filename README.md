@@ -2,6 +2,11 @@
 
 Software stack for **DD Robocon 2026 National Finals**
 
+| Robot 1 (Manual) | Robot 2 (Autonomous) |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/fb5ffdf2-c28a-48e6-a34a-bcc85de3d71b" alt="Robot 1" width="400"/> | <img src="https://github.com/user-attachments/assets/56806eaa-0c38-4870-855d-128a4aa75dce" alt="Robot 2" width="400"/> |
+
+
 ## 📂 Repository Structure
 
 ```
