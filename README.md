@@ -41,7 +41,7 @@ Robocon26/
 
 ---
 
-## 🤖 Robot 1 — Manual (Teleop)
+## 🤖 Robot 1 — Manual 
 
 | Component | Details |
 |---|---|
