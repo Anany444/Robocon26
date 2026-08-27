@@ -180,17 +180,3 @@ sudo systemctl start r1_robot.service
 ```
 
 ---
-
-## 🎮 Visualization
-
-The stack uses **Foxglove Bridge** for real-time remote visualization — launched automatically with the hardware bringup. Connect via Foxglove Studio to monitor:
-- Point-LIO map & odometry
-- YOLO annotated camera feeds
-- Robot state, zone transitions, and planner decisions
-- `cmd_vel` commands
-
----
-
-## 👥 Team Phoenix — IIT Patna
-
-DD Robocon 2026 National Finals, IIT Delhi
